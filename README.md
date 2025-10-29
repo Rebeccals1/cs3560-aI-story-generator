@@ -1,11 +1,10 @@
-# 🌙 AI Story Generator — Choose Your Own Adventure  
-**CS3560 – Assignment 3 (Option B)**  
-Team Members:  
+# AI Story Generator — Choose Your Own Adventure  
+**Team Members:**
 - Rebecca Smith  
 - Viet Nguyen  
 - Tanya  
 
-## 📌 Overview  
+## Overview  
 The **AI Story Generator** is an interactive *Choose Your Own Adventure* storytelling application.  
 Players create a **character**, define a **world**, choose a **genre**, and then experience a branching narrative where **every choice shapes the story**. Users can customize story length, complexity, and writing style. Finished stories can be **saved, tagged, favorited, and exported**.
 
@@ -21,7 +20,7 @@ Optional enhancements include:
 
 ---
 
-## 🎮 Example Program Flow  
+## Example Program Flow  
 ### 1. Select a Genre  
 Fantasy | Sci-Fi | Mystery | Romance | Horror
 
@@ -56,7 +55,7 @@ Player chooses → story branches → continues with new scenes.
 
 ---
 
-## 👥 Team Roles  
+## Team Roles  
 | Team Member | Role | Responsibilities |
 |------------|------|----------------|
 | **Person A** | Story & Model Engineer | Story data structures, character/world models, genre strategies |
@@ -70,7 +69,7 @@ Player chooses → story branches → continues with new scenes.
 
 ---
 
-## 🧱 Proposed File Structure (WIP)
+## Proposed File Structure (WIP)
 ```
 src/
 ├── Main.java
@@ -127,10 +126,9 @@ src/
 └── TTSService.java // OPTIONAL
 ```
 
-
 ---
 
-## ⚙️ Core Design Patterns Used
+## Core Design Patterns Used
 
 | Pattern | Purpose in This Project |
 |--------|-------------------------|
@@ -141,7 +139,7 @@ src/
 
 ---
 
-## 📂 Story Saving & Export Features  
+## Story Saving & Export Features  
 Users can:
 - Save stories locally (JSON)
 - Tag and favorite stored stories
@@ -151,18 +149,7 @@ Users can:
 
 ---
 
-## 🚧 Status  
-📍 **In Development**  
-UML and final API integration still in progress.
-
----
-
-## 🔗 Repository Link  
-**GitHub:** _TBD_
-
----
-
-## 💡 Future Enhancements  
+## Future Enhancements  
 - Multi-choice branching (more than A/B)
 - Visual story map tree
 - Multiplayer co-op storytelling mode
