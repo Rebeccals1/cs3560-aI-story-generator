@@ -1,24 +1,22 @@
 # AI Story Generator — Choose Your Own Adventure  
 **Team Members:**
-- Rebecca Smith  
-- Viet Nguyen  
-- Tanya  
+- **Rebecca Smith**
+- **Viet Nguyen**
+- **Tanya Patel**
 
 ## Overview  
 The **AI Story Generator** is an interactive *Choose Your Own Adventure* storytelling application.  
 Players create a **character**, define a **world**, choose a **genre**, and then experience a branching narrative where **every choice shapes the story**. Users can customize story length, complexity, and writing style. Finished stories can be **saved, tagged, favorited, and exported**.
 
-This project is designed using:
+**This project is designed using:**
 - **MVC Architecture**
 - **Strategy Pattern** (for genre behavior & story flow)
 - **Factory Pattern** (for generating correct genre strategy)
 - **Singleton Pattern** (for shared AI client instance)
 
-Optional enhancements include:
+**Optional enhancements that could be included later:**
 - AI Image Generation (ex: DALL·E)
 - Text-to-Speech narration
-
----
 
 ## Example Program Flow  
 ### 1. Select a Genre  
@@ -50,10 +48,7 @@ Scene 1: Elowen steps into the Whispering Forest...
 A) Follow a glowing trail
 B) Call out into the trees
 
-
 Player chooses → story branches → continues with new scenes.
-
----
 
 ## Team Roles  
 | Team Member | Role | Responsibilities |
@@ -63,11 +58,9 @@ Player chooses → story branches → continues with new scenes.
 | **Person C** | Controller & AI Engineer | Game logic, OpenAI integration, saving & exporting stories |
 
 **Assigned Roles:**  
-- Person A = *TBD*  
-- Person B = *TBD*  
-- Person C = *TBD*  
-
----
+- Person A = Rebecca Smith
+- Person B = Viet Nguyen  
+- Person C = Tanya Patel  
 
 ## Proposed File Structure (WIP)
 ```
@@ -126,8 +119,6 @@ src/
 └── TTSService.java // OPTIONAL
 ```
 
----
-
 ## Core Design Patterns Used
 
 | Pattern | Purpose in This Project |
@@ -147,13 +138,8 @@ Users can:
 - *(Optional)* Generate matching images
 - *(Optional)* Listen to narration audio
 
----
-
 ## Future Enhancements  
 - Multi-choice branching (more than A/B)
 - Visual story map tree
 - Multiplayer co-op storytelling mode
 - Style Mode: “Poetic”, “Comic”, “Dark Realism”
-
----
-
