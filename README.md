@@ -22,8 +22,10 @@
 - **MVC architecture**: Clear separation between UI panels, controller logic, and model data.
 - **Singleton**: OpenAIClient provides a single shared HTTP client and config loader.
 - **Builder Pattern**: PromptBuilder constructs complex AI prompts from characters, worlds, genres, and choice history.
-- **Strategy Pattern**: Genre behavior, tone, and stylistic rules injected via:
-  - StoryStrategy → FantasyStrategy, SciFiStrategy, RomanceStrategy, etc.
+- **Strategy Pattern**: 
+  - **StoryModeStrategy** interface defines a pluggable set of storytelling rules. 
+  - **AdultMode** and **ChildFriendlyMode** implement these rules with different tones, vocabulary levels and content guidelines. 
+  - Together, they allow the story generator to dynamically adjust writing style and narrative complexity based on the user’s selected mode without changing any core logic. 
 - **Observer-Style UI Updates**: The controller pushes new scenes to the view, which updates dynamically.
 
 ## Main Architecture
@@ -75,8 +77,15 @@ src/main/java/
 └── Main.java                                # Application entry point
 
 ```
+## JUnit Testing
+
+The JUnit testing structure mirrors the main project layout and validates the most important parts of the application.
+- Model tests check that characters, scenes, story state, and saved files behave correctly.
+- Controller tests use a simple FakeMainFrame to confirm that the story flow and user choices work as intended without opening the Swing interface.
+- Service tests verify that story files save and load correctly.
 
 ## JUnit Testing Architecture
+
 ```
 src/test/java/
 ├── controller/
