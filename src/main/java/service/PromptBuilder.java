@@ -1,5 +1,6 @@
 package service;
 
+import model.strategy.StoryModeStrategy;
 import model.story.*;
 
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.List;
  * PromptBuilder
  *
  * Builds the full natural-language prompt sent to OpenAI for each chapter.
+ *
  * Responsibilities:
  *  - Enforce 10-chapter structure (with a special final chapter).
  *  - Inject character, world, and user-selected settings (length, complexity, style).
  *  - Encode the FULL choice history so the story feels continuous.
  *  - Strongly enforce GENRE behavior (Romance, Fantasy, SciFi, Mystery, Horror, etc.).
+ *  - Delegate "mode rules" (Child-Friendly vs Adult) to a Strategy implementation.
  *  - Clearly specify the JSON contract the model must return:
  *        {
  *          "chapter": 1–10,
@@ -24,6 +27,19 @@ import java.util.List;
  * The model is instructed to return ONLY valid JSON (no markdown, no commentary).
  */
 public class PromptBuilder {
+
+    /** STRATEGY PATTERN: injected at runtime based on user controls. */
+    private StoryModeStrategy modeStrategy;
+
+    public PromptBuilder() { }
+
+    public PromptBuilder(StoryModeStrategy modeStrategy) {
+        this.modeStrategy = modeStrategy;
+    }
+
+    public void setModeStrategy(StoryModeStrategy strategy) {
+        this.modeStrategy = strategy;
+    }
 
     public String buildStoryPrompt(StoryModel storyModel,
                                    String lastChoiceId,
@@ -55,6 +71,15 @@ public class PromptBuilder {
         sb.append("Length: ").append(length).append("\n");
         sb.append("Complexity: ").append(complexity).append("\n");
         sb.append("Style: ").append(style).append("\n\n");
+
+        /* ---------------------------------------------------------
+           STRATEGY PATTERN: mode-specific rules (Child vs Adult)
+           --------------------------------------------------------- */
+        if (modeStrategy != null) {
+            sb.append("=== MODE RULES (COMPLEXITY / STYLE) ===\n");
+            modeStrategy.applyModeRules(sb, storyModel, length, complexity, style);
+            sb.append("\n");
+        }
 
         // ---------------------------------------------------------
         // GENRE ENFORCEMENT BLOCK

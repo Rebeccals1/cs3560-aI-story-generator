@@ -7,55 +7,97 @@
 4. Run `Main.java` to launch the application
 
 ## Features
-- [x] Interactive character creation with traits and backstory
-- [x] Dynamic world building with custom locations and rules
-- [x] Multiple genre support (Fantasy, Sci-Fi, Mystery, Romance, Horror)
-- [x] AI-powered story generation with branching choices
-- [x] Save/load story sessions to personal library
-- [x] Robust error handling and AI response parsing
-- [x] Story export functionality
-- [x] Customizable story length, style, and complexity
+- [x] Interactive character creation (name, traits, backstory)
+- [x] Dynamic world building (location, rules, history)
+- [x] Genre-adaptive storytelling (Fantasy, Sci-Fi, Mystery, Romance, Horror)
+- [x] AI-powered chapter generation with branching A/B/C choices
+- [x] 10-chapter structured narrative with final ending
+- [x] Save/load system using JSON files stored in /saves
+- [x] Consistent UI with Swing panels, vertical choice buttons, loading overlay
+- [x] Robust error handling and JSON validation
+- [x] Configurable story length, complexity, and style
+- [x] Async AI calls using SwingWorker (non-blocking UI)
 
 ## Design Patterns
-- **MVC**: Separates UI (Swing panels), controller logic, and data models
-- **Singleton**: OpenAI client instance shared across all API calls
-- **Builder**: PromptBuilder constructs AI prompts from story context
-- **Strategy**: Different story generation approaches based on genre/style
-- **Observer**: UI components update automatically when story state changes
+- **MVC architecture**: Clear separation between UI panels, controller logic, and model data.
+- **Singleton**: OpenAIClient provides a single shared HTTP client and config loader.
+- **Builder Pattern**: PromptBuilder constructs complex AI prompts from characters, worlds, genres, and choice history.
+- **Strategy Pattern**: Genre behavior, tone, and stylistic rules injected via:
+  - StoryStrategy → FantasyStrategy, SciFiStrategy, RomanceStrategy, etc.
+- **Observer-Style UI Updates**: The controller pushes new scenes to the view, which updates dynamically.
 
-## Architecture
+## Main Architecture
 ```
 src/main/java/
-├── Main.java                          # Application entry point
 ├── controller/
-│   └── MainController.java           # Main controller connecting UI to services
+│   └── MainController.java                  # Core application logic, scene flow, async API calls
+│
 ├── model/
-│   ├── OpenAIClient.java              # HTTP client singleton for OpenAI API
-│   └── story/
-│       ├── Character.java             # Player character with traits
-│       ├── World.java                 # Story world with rules and history  
-│       ├── Scene.java                 # Individual story scenes
-│       ├── Choice.java                # Player choice options (A/B)
-│       ├── StoryModel.java            # Complete story state
-│       ├── StoryState.java            # Current position in story
-│       └── SavedStory.java            # Serializable story for persistence
+│   ├── story/                               # Domain models (pure data + logic)
+│   │   ├── CharacterModel.java
+│   │   ├── ChoiceModel.java
+│   │   ├── ChoiceRecordModel.java
+│   │   ├── SavedStoryModel.java
+│   │   ├── SceneModel.java
+│   │   ├── StoryModel.java
+│   │   ├── StoryStateModel.java
+│   │   └── WorldModel.java
+│   │
+│   ├── strategy/                            # STRATEGY PATTERN
+│   │   ├── StoryModeStrategy.java           # Strategy Interface
+│   │   ├── AdultMode.java                   # Adult story rules
+│   │   └── ChildFriendlyMode.java           # Child-friendly story rules
+│   │
+│   └── OpenAIClient.java                    # Singleton HTTP client with retry/backoff
+│
 ├── service/
-│   ├── OpenAIService.java             # Story generation with AI
-│   ├── PromptBuilder.java             # Constructs prompts for AI
-│   └── StoryLibrary.java              # Save/load story persistence
-└── view/
-    ├── MainFrame.java                 # Main application window
-    ├── components/
-    │   ├── ErrorDialog.java           # Error message display
-    │   └── LoadingIndicator.java      # Loading spinner
-    └── panels/
-        ├── CharacterPanel.java        # Character creation UI
-        ├── ChoicePanel.java           # Choice selection buttons
-        ├── ControlsPanel.java         # Story settings and controls
-        ├── GenrePanel.java            # Genre selection
-        ├── LibraryPanel.java          # Saved stories browser
-        ├── StoryPanel.java            # Story text display
-        └── WorldPanel.java            # World building UI
+│   ├── OpenAIService.java                   # Maps prompt ↔ response, calls OpenAIClient
+│   ├── PromptBuilder.java                   # Builds full prompt (uses Strategy)
+│   ├── StoryLibrary.java                    # Loads saved stories for library view
+│   └── StorySaveSystem.java                 # Saves/loads JSON story files
+│
+├── view/
+│   ├── components/
+│   │   ├── ErrorDialog.java                 # Error pop-up
+│   │   └── LoadingIndicator.java            # Loading spinner overlay
+│   │
+│   ├── panels/
+│   │   ├── CharacterPanel.java              # Character creation UI
+│   │   ├── ChoicePanel.java                 # A/B/C choice buttons
+│   │   ├── ControlsPanel.java               # Length/complexity/style options
+│   │   ├── GenrePanel.java                  # Genre selection
+│   │   ├── LibraryPanel.java                # Saved story list
+│   │   ├── StoryPanel.java                  # Displays story text + buttons
+│   │   └── WorldPanel.java                  # World-building input
+│   │
+│   └── MainFrame.java                       # Top-level JFrame, screen switching
+│
+└── Main.java                                # Application entry point
+
+```
+
+## JUnit Testing Architecture
+```
+src/test/java/
+├── controller/
+│   ├── FakeMainFrame.java          # UI test double (no real Swing UI)
+│   └── MainControllerTest.java     # Tests controller logic, choice flow, loading, etc.
+│
+├── model/
+│   ├── story/
+│   │   ├── CharacterModelTest.java
+│   │   ├── ChoiceRecordModelTest.java
+│   │   ├── SavedStoryModelTest.java
+│   │   ├── SceneModelTest.java
+│   │   ├── StoryModelTest.java
+│   │   ├── StoryStateModelTest.java
+│   │   └── WorldModelTest.java
+│   │
+│   └── OpenAIClientTest.java        # Tests JSON escaping, retry logic, and config validation
+│
+└── service/
+    └── StorySaveSystemTest.java     # Tests save/load serialization and file handling
+
 ```
 
 ## Demo

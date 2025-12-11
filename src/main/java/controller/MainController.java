@@ -1,5 +1,8 @@
 package controller;
 
+import model.strategy.AdultMode;
+import model.strategy.ChildFriendlyMode;
+import model.strategy.StoryModeStrategy;
 import model.story.*;
 import service.OpenAIService;
 import service.PromptBuilder;
@@ -20,8 +23,9 @@ import java.util.List;
  *   • Generates new scenes using OpenAI (async)
  *   • Saves / loads progress via StorySaveSystem
  *
- * In summary:
- *   This class is the “brain” of the story generator.
+ *   DESIGN PATTERNS:
+ *     - MVC controller
+ *     - Uses Strategy (StoryModeStrategy) for Child-vs-Adult mode behavior
  */
 public class MainController {
 
@@ -42,6 +46,9 @@ public class MainController {
     private String selectedLength;
     private String selectedComplexity;
     private String selectedStyle;
+
+    /** STRATEGY PATTERN: runtime-selected story mode. */
+    private StoryModeStrategy modeStrategy;
 
 
     /* ---------------------------------------------------------
@@ -75,6 +82,20 @@ public class MainController {
         this.selectedLength = length;
         this.selectedComplexity = complexity;
         this.selectedStyle = style;
+
+        /* ----------------------------------------------
+           STRATEGY PATTERN:
+           Pick StoryModeStrategy based on complexity.
+           ---------------------------------------------- */
+        if ("Child-Friendly".equalsIgnoreCase(complexity)) {
+            modeStrategy = new ChildFriendlyMode();
+        } else {
+            // Default to adult/general mode
+            modeStrategy = new AdultMode();
+        }
+
+        // Inject strategy into PromptBuilder
+        promptBuilder.setModeStrategy(modeStrategy);
     }
 
 
