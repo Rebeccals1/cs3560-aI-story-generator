@@ -1,0 +1,43 @@
+{
+  "id" : "12201c03-9945-45c8-98ac-ee0e5d89691e",
+  "title" : "Rebecca's Journey",
+  "genre" : "romance",
+  "character" : {
+    "name" : "Rebecca",
+    "traits" : [ ],
+    "backstory" : "the year is 1924"
+  },
+  "world" : {
+    "location" : "Hill Top Manor",
+    "rule" : "",
+    "history" : "You are a rich woman with a mansion."
+  },
+  "scenes" : [ {
+    "storyText" : "Rebecca stood at the grand balcony of Hill Top Manor, the evening breeze softly caressing her skin. The sun dipped low on the horizon, casting a golden glow over the sprawling gardens below, where the vibrant blooms seemed to dance in the twilight. She sighed dreamily, her heart fluttering with the awareness of the evening's potential, for it held a secret. Tonight, Lord Samuel would be joining her for tea—a gentleman who not only ignited sparks in her heart but also a sense of longing she could barely contain. As the clock struck six, she could hear the distant sound of horse hooves approaching, each step echoing her anticipation. Memories of their last encounter flashed through her mind—the way he looked into her eyes as if they held the universe, the almost imperceptible brush of his hand against hers. Rebecca could hardly wait to see him. She adjusted her dress, a soft lavender that hugged her figure just right, and took a deep breath. Would he notice how her heart raced at his mere presence? Would he share the same longing she felt? With a soft whisper of hope, she reminded herself to be composed, as he was a man of poise and elegance. As the door opened and Samuel entered, his striking blue eyes met hers, and in that moment, time stood still. 'Rebecca, you look utterly enchanting,' he said, his voice rich and warm, sending shivers down her spine. A smile crept onto her lips, a mix of shyness and joy. 'And you, Lord Samuel, are always a delight to behold,' she replied, her voice barely above a whisper. They moved closer, a palpable tension hanging between them, as a single touch could spark the flame of the feelings they both harbored so deeply.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Invite Samuel to join her for a walk in the garden."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Propose a game of chess in the drawing room."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Ask him about his travels and share a story of her own."
+    },
+    "ending" : false
+  } ],
+  "choiceHistory" : [ {
+    "chapter" : 1,
+    "choiceId" : "B",
+    "choiceDescription" : "Propose a game of chess in the drawing room."
+  } ],
+  "createdAt" : [ 2025, 12, 10, 14, 57, 20, 966554600 ],
+  "lastModified" : [ 2025, 12, 10, 14, 57, 20, 966554600 ],
+  "totalChapters" : 1,
+  "storyConfiguration" : "{}",
+  "formattedCreatedDate" : "Dec 10, 2025 14:57",
+  "displayTitle" : "Rebecca's Journey",
+  "shortSummary" : "Rebecca stood at the grand balcony of Hill Top Manor, the evening breeze softly caressing her skin. The sun dipped low on the horizon, casting a golde..."
+}
