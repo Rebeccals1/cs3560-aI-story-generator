@@ -21,7 +21,8 @@
 
 ## Design Patterns
 **MVC Architecture**
-  The project follows a clear Model–View–Controller (MVC) structure to separate concerns and improve maintainability.
+
+The project follows a clear Model–View–Controller (MVC) structure to separate concerns and improve maintainability.
 
 - **Model:** Domain classes such as `StoryModel`, `StoryStateModel`, `SceneModel`, `CharacterModel`, and `WorldModel` represent the story state and business rules.
 These classes are UI-agnostic and focused solely on data and behavior.
@@ -35,26 +36,27 @@ This keeps application flow centralized and testable.
 This separation allows each layer to evolve independently and enables controller logic to be tested without launching the Swing UI.
 
 **Singleton**
-  - `OpenAIClient` provides a single shared HTTP client and configuration loader with retry and timeout handling.
+
+`OpenAIClient` provides a single shared HTTP client with centralized API configuration, retries, and timeouts.
 
 **Builder Pattern**
-  - `PromptBuilder` constructs compact, token-safe AI prompts from character, world, genre, and story state data while enforcing strict JSON output.
+
+`PromptBuilder` assembles compact, token-safe AI prompts from character, world, genre, and story state data.
 
 **Strategy Pattern**
-  - `StoryModeStrategy` defines interchangeable storytelling rule sets.
-  - `AdultMode` and `ChildFriendlyMode` implement different tone, vocabulary, and content constraints.
 
-Strategies are selected at runtime based on user controls without modifying controller logic.
+`StoryModeStrategy` allows different storytelling behaviors.
+`AdultMode` and `ChildFriendlyMode` are selected at runtime based on user controls without changing controller logic.
 
 **Factory Pattern**
-  - `CharacterFactory` centralizes the creation of `CharacterModel` objects, ensuring default trait lists and backstory values are consistently applied.
-  - `WorldFactory` centralizes the creation of `WorldModel objects`, enforcing default rules and history while keeping domain models simple and free of construction logic.
 
-These factories remove conditional logic from `MainController`, reduce null-related bugs, and improve testability by isolating object creation concerns.
+`CharacterFactory` and `WorldFactory` centralize object creation and enforce default values.
+This removes conditional logic from the controller, prevents null state bugs, and improves testability.
 
 **Observer-Style UI Updates**
-  - Asynchronous tasks notify the controller upon completion.
-  - The controller updates views dynamically (story text, choices, loading state) without tight coupling.
+
+The project uses MVC to separate data, UI, and application flow. Models store story state and rules, views render the Swing UI, and `MainController` manages user actions and story progression.
+This separation improves maintainability and enables controller testing without launching the UI.
 
 ## Main Architecture
 ```
