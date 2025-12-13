@@ -23,13 +23,13 @@
 ### MVC Architecture
   The project follows a clear Model–View–Controller (MVC) structure to separate concerns and improve maintainability.
 
-- **Model:** Domain classes such as StoryModel, StoryStateModel, SceneModel, CharacterModel, and WorldModel represent the story state and business rules.
+- **Model:** Domain classes such as `StoryModel`, `StoryStateModel`, `SceneModel`, `CharacterModel`, and `WorldModel` represent the story state and business rules.
 These classes are UI-agnostic and focused solely on data and behavior.
 
-- **View:** Swing UI components (MainFrame, StoryPanel, ChoicePanel, CharacterPanel, etc.) are responsible only for rendering information and collecting user input.
+- **View:** Swing UI components (`MainFrame`, `StoryPanel`, `ChoicePanel`, `CharacterPanel`, etc.) are responsible only for rendering information and collecting user input.
 Views do not contain application logic.
 
-- **Controller:** MainController coordinates user actions, story progression, asynchronous AI calls, and view updates.
+- **Controller:** `MainController` coordinates user actions, story progression, asynchronous AI calls, and view updates.
 This keeps application flow centralized and testable.
 
 This separation allows each layer to evolve independently and enables controller logic to be tested without launching the Swing UI.
@@ -50,7 +50,7 @@ Strategies are selected at runtime based on user controls without modifying cont
   - `CharacterFactory` centralizes the creation of `CharacterModel` objects, ensuring default trait lists and backstory values are consistently applied.
   - `WorldFactory` centralizes the creation of `WorldModel objects`, enforcing default rules and history while keeping domain models simple and free of construction logic.
 
-These factories remove conditional logic from MainController, reduce null-related bugs, and improve testability by isolating object creation concerns.
+These factories remove conditional logic from `MainController`, reduce null-related bugs, and improve testability by isolating object creation concerns.
 
 ### Observer-Style UI Updates
   - Asynchronous tasks notify the controller upon completion.
