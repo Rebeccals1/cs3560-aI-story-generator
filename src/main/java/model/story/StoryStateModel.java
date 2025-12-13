@@ -7,7 +7,7 @@ import java.util.List;
 public class StoryStateModel {
 
     /** Project specification: 10 chapters total */
-    public static final int MAX_CHAPTERS = 10;
+    public static final int MAX_CHAPTERS = 5;
 
     private int chapter = 1;
     private ChoiceModel lastChoice;

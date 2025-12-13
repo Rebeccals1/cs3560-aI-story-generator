@@ -164,6 +164,10 @@ public class MainController {
             protected void done() {
                 try {
                     SceneModel scene = get();
+
+                    // ✅ Force final chapter to become an ending scene
+                    scene = forceEndingIfFinalChapter(scene);
+
                     storyModel.setCurrentScene(scene);
 
                     mainFrame.showScene(scene);
@@ -192,6 +196,34 @@ public class MainController {
                 }
             }
         }.execute();
+    }
+
+    /**
+     * Ensures the final chapter ALWAYS ends with:
+     *   --- THE END ---
+     * and disables choices permanently.
+     */
+    private SceneModel forceEndingIfFinalChapter(SceneModel scene) {
+
+        int chapter = storyModel.getState().getChapter();
+        if (chapter != StoryStateModel.MAX_CHAPTERS) {
+            return scene;
+        }
+
+        String text = (scene != null && scene.getStoryText() != null)
+                ? scene.getStoryText().trim()
+                : "";
+
+        if (!text.isEmpty()) text += "\n\n";
+        text += "--- THE END ---";
+
+        return new SceneModel(
+                text,
+                new ChoiceModel("A", "The End"),
+                new ChoiceModel("B", "The End"),
+                new ChoiceModel("C", "The End"),
+                true
+        );
     }
 
     /* =========================================================
@@ -271,6 +303,7 @@ public class MainController {
         storyModel.setScenes(new ArrayList<>(saved.getScenes()));
         storyModel.setChoiceHistory(saved.getChoiceHistory());
 
+        // NOTE: you said "chapters, not scenes" — we can adjust this next if needed.
         storyModel.setCurrentChapter(saved.getScenes().size());
         storyModel.restoreCurrentSceneAfterLoad();
     }
