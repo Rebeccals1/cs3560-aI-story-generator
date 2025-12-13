@@ -20,7 +20,7 @@
 - [x] Centralized default handling for character and world creation via factories (prevents null state bugs)
 
 ## Design Patterns
-### MVC Architecture
+**MVC Architecture**
   The project follows a clear Model–View–Controller (MVC) structure to separate concerns and improve maintainability.
 
 - **Model:** Domain classes such as `StoryModel`, `StoryStateModel`, `SceneModel`, `CharacterModel`, and `WorldModel` represent the story state and business rules.
@@ -34,25 +34,25 @@ This keeps application flow centralized and testable.
 
 This separation allows each layer to evolve independently and enables controller logic to be tested without launching the Swing UI.
 
-### Singleton
+**Singleton**
   - `OpenAIClient` provides a single shared HTTP client and configuration loader with retry and timeout handling.
 
-### Builder Pattern
+**Builder Pattern**
   - `PromptBuilder` constructs compact, token-safe AI prompts from character, world, genre, and story state data while enforcing strict JSON output.
 
-### Strategy Pattern
+**Strategy Pattern**
   - `StoryModeStrategy` defines interchangeable storytelling rule sets.
   - `AdultMode` and `ChildFriendlyMode` implement different tone, vocabulary, and content constraints.
 
 Strategies are selected at runtime based on user controls without modifying controller logic.
 
-### Factory Pattern
+**Factory Pattern**
   - `CharacterFactory` centralizes the creation of `CharacterModel` objects, ensuring default trait lists and backstory values are consistently applied.
   - `WorldFactory` centralizes the creation of `WorldModel objects`, enforcing default rules and history while keeping domain models simple and free of construction logic.
 
 These factories remove conditional logic from `MainController`, reduce null-related bugs, and improve testability by isolating object creation concerns.
 
-### Observer-Style UI Updates
+**Observer-Style UI Updates**
   - Asynchronous tasks notify the controller upon completion.
   - The controller updates views dynamically (story text, choices, loading state) without tight coupling.
 
