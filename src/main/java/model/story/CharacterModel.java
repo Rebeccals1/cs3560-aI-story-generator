@@ -1,38 +1,46 @@
 package model.story;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * CharacterModel
+ *
+ * Pure domain model representing the story protagonist.
+ */
 public class CharacterModel {
+
     private String name;
     private List<String> traits;
     private String backstory;
 
     /** Required for Jackson */
-    public CharacterModel() { }
+    public CharacterModel() {
+        this("", null, null);
+    }
 
-    // Main constructor - uses defaults for missing values
+    /** Main constructor */
     public CharacterModel(String name, List<String> traits, String backstory) {
         this.name = name != null ? name : "";
         this.traits = traits != null ? traits : new ArrayList<>();
-        this.backstory = backstory != null ? backstory : "Unknown";
+        this.backstory = (backstory != null && !backstory.isBlank())
+                ? backstory
+                : "Unknown";
     }
 
-    // Convenience constructors delegate to main constructor
+    /** For Testing */
     public CharacterModel(String name) {
         this(name, null, null);
     }
 
-    public CharacterModel(String name, List<String> traits) {
-        this(name, traits, null);
-    }
+    /* -----------------------------
+       Getters / Setters
+       ----------------------------- */
 
-    // Getters + Setters
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name != null ? name : "";
     }
 
     public List<String> getTraits() {
@@ -40,14 +48,14 @@ public class CharacterModel {
     }
 
     public void setTraits(List<String> traits) {
-        this.traits = traits;
+        this.traits = traits != null ? traits : new ArrayList<>();
     }
 
-    public String getBackstory() {
-        return backstory;
-    }
+    public String getBackstory() { return backstory; }
 
     public void setBackstory(String backstory) {
-        this.backstory = backstory;
+        this.backstory = (backstory != null && !backstory.isBlank())
+                ? backstory
+                : "Unknown";
     }
 }

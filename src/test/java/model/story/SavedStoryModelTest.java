@@ -2,6 +2,7 @@ package model.story;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SavedStoryModelTest {
@@ -26,6 +27,20 @@ class SavedStoryModelTest {
 
         assertEquals(1, saved.getTotalChapters());
         assertEquals(1, saved.getScenes().size());
+    }
+
+    @Test
+    void testChoiceHistorySetter() {
+        ChoiceRecordModel r =
+                new ChoiceRecordModel(1, "A", "Explore cave");
+
+        SavedStoryModel saved = new SavedStoryModel();
+        saved.setChoiceHistory(List.of(r));
+
+        assertNotNull(saved.getChoiceHistory());
+        assertEquals(1, saved.getChoiceHistory().size());
+        assertEquals("Explore cave",
+                saved.getChoiceHistory().get(0).getChoiceDescription());
     }
 
     @Test

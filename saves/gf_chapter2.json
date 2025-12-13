@@ -1,0 +1,58 @@
+{
+  "id" : "be42284e-bb17-486a-9e06-7afa54727e5d",
+  "title" : "gf's Journey",
+  "genre" : "romance",
+  "character" : {
+    "name" : "gf",
+    "traits" : [ ],
+    "backstory" : "An unknown past."
+  },
+  "world" : {
+    "location" : "london",
+    "rule" : "The rules of this world are unclear.",
+    "history" : "A forgotten history shapes this world."
+  },
+  "scenes" : [ {
+    "storyText" : "Ella felt a buzz in the air as she walked through the busy streets of London. The sun peeked through the clouds, making her heart flutter with excitement. She spotted Jamie, her best friend, waiting by the old bookstore. His smile brightened her day, and she could feel a warmth spreading in her cheeks. Today felt special, like something magical was about to happen between them. As they wandered through the aisles of books, their hands brushed against each other, sending sparks of joy and nervousness. Ella took a deep breath, trying to decide if she should tell Jamie how she felt, but the thought made her heart race even more. Will their friendship grow into something more today? ",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Ella decides to tell Jamie about her feelings."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Ella chooses to drop hints and see how Jamie reacts."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Ella decides it's best to keep her feelings to herself for now."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Ella felt her heart race as she approached Jamie, feeling the warmth of the sun on her skin. Jamie smiled brightly, his eyes sparkling with joy, making Ella's cheeks blush. They exchanged stories about their week, laughter ringing around them like music. Just as she was about to share her latest adventure at school, Jamie leaned in a little closer, and Ella's breath caught in her throat. Was it just her imagination, or was there something different in his gaze? A flutter of hope filled her heart as she pondered if this was the moment their friendship could turn into something more.\n\nSuddenly, a soft breeze tousled their hair, and Ella felt a tingle of excitement run down her spine. Could this day be the start of a new chapter? With the bustling crowd around them, she knew the rules of their friendship might be changing. Every choice from here on could lead them down unexpected paths, and Ella was ready to explore what lay ahead.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Ella decides to invite Jamie to a fun café where they can talk more privately."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "She takes a deep breath and confesses her feelings for him right there."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Ella suggests they go on an adventure around the city to discover new places together."
+    },
+    "ending" : false
+  } ],
+  "choiceHistory" : [ {
+    "chapter" : 1,
+    "choiceId" : "B",
+    "choiceDescription" : "Ella chooses to drop hints and see how Jamie reacts."
+  } ],
+  "createdAt" : [ 2025, 12, 13, 1, 15, 25, 924165900 ],
+  "lastModified" : [ 2025, 12, 13, 1, 15, 25, 925167100 ],
+  "totalChapters" : 2,
+  "storyConfiguration" : "{}",
+  "displayTitle" : "gf's Journey",
+  "formattedCreatedDate" : "Dec 13, 2025 01:15",
+  "shortSummary" : "Ella felt a buzz in the air as she walked through the busy streets of London. The sun peeked through the clouds, making her heart flutter with excitem..."
+}

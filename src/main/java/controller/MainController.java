@@ -7,6 +7,8 @@ import model.story.*;
 import service.OpenAIService;
 import service.PromptBuilder;
 import service.StorySaveSystem;
+import service.CharacterFactory;
+import service.WorldFactory;
 import view.MainFrame;
 import view.components.ErrorDialog;
 
@@ -27,6 +29,7 @@ import java.util.List;
  * DESIGN PATTERNS:
  *   - MVC Controller
  *   - Strategy Pattern (StoryModeStrategy)
+ *   - Factory Pattern (CharacterFactory, WorldFactory)
  */
 public class MainController {
 
@@ -77,11 +80,15 @@ public class MainController {
     }
 
     public void onCharacterEntered(String name, List<String> traits, String backstory) {
-        storyModel.setCharacter(new CharacterModel(name, traits, backstory));
+        storyModel.setCharacter(
+                CharacterFactory.create(name, traits, backstory)
+        );
     }
 
     public void onWorldEntered(String location, String rule, String history) {
-        storyModel.setWorld(new WorldModel(location, rule, history));
+        storyModel.setWorld(
+                WorldFactory.create(location, rule, history)
+        );
     }
 
     public void onControlsSelected(String length, String complexity, String style) {
@@ -165,7 +172,21 @@ public class MainController {
                     mainFrame.getChoicePanel().setButtonsEnabled(enable);
 
                 } catch (Exception ex) {
+
+                    // Graceful fallback text instead of blank panel
+                    SceneModel fallback = new SceneModel(
+                            "AI story generation is unavailable.\n\n" +
+                                    "Please configure your OpenAI API key to continue.",
+                            null, null, null,
+                            true
+                    );
+
+                    storyModel.setCurrentScene(fallback);
+                    mainFrame.showScene(fallback);
+                    mainFrame.getChoicePanel().setButtonsEnabled(false);
+
                     ErrorDialog.show(mainFrame, "AI Error", ex);
+
                 } finally {
                     mainFrame.hideLoading();
                 }
@@ -220,15 +241,7 @@ public class MainController {
                 return;
             }
 
-            storyModel = new StoryModel();
-            storyModel.setGenre(saved.getGenre());
-            storyModel.setCharacter(saved.getCharacter());
-            storyModel.setWorld(saved.getWorld());
-            storyModel.setScenes(new ArrayList<>(saved.getScenes()));
-            storyModel.setChoiceHistory(saved.getChoiceHistory());
-
-            storyModel.setCurrentChapter(saved.getScenes().size());
-            storyModel.restoreCurrentSceneAfterLoad();
+            restoreLoadedStory(saved);
 
             SceneModel last = storyModel.getCurrentScene();
             mainFrame.showScene(last);
@@ -237,6 +250,29 @@ public class MainController {
         } catch (Exception ex) {
             ErrorDialog.show(mainFrame, "Load Error", ex);
         }
+    }
+
+    /* =========================================================
+       RESTORE STORY (TEST + UI SHARED LOGIC)
+       ========================================================= */
+
+    public void restoreLoadedStory(SavedStoryModel saved) {
+
+        if (saved == null) {
+            throw new IllegalArgumentException("Saved story cannot be null");
+        }
+
+        storyModel = new StoryModel();
+
+        storyModel.setGenre(saved.getGenre());
+        storyModel.setCharacter(saved.getCharacter());
+        storyModel.setWorld(saved.getWorld());
+
+        storyModel.setScenes(new ArrayList<>(saved.getScenes()));
+        storyModel.setChoiceHistory(saved.getChoiceHistory());
+
+        storyModel.setCurrentChapter(saved.getScenes().size());
+        storyModel.restoreCurrentSceneAfterLoad();
     }
 
     /* =========================================================

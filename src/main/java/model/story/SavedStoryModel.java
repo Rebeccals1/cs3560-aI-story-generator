@@ -101,7 +101,7 @@ public class SavedStoryModel {
        ============================================================ */
 
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public void setId(String id) { this.id = id; updateModified(); }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; updateModified(); }
@@ -122,9 +122,16 @@ public class SavedStoryModel {
         updateModified();
     }
 
-    public List<ChoiceRecordModel> getChoiceHistory() { return choiceHistory; }
-    public void setChoiceHistory(List<ChoiceRecordModel> h) {
-        this.choiceHistory = h;
+    public List<ChoiceRecordModel> getChoiceHistory() {
+        return choiceHistory;
+    }
+
+    /**
+     * REQUIRED FIX (OPTION A)
+     * Allows controller + StoryLibrary to restore choice history.
+     */
+    public void setChoiceHistory(List<ChoiceRecordModel> history) {
+        this.choiceHistory = history;
         updateModified();
     }
 

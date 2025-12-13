@@ -4,26 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * StoryStateModel
- *
- * Tracks:
- *   - Current chapter number (1–10)
- *   - Last selected choice
- *   - Full choice history (for save/load)
- *
- * Supports:
- *   - Resetting for new story
- *   - Restoring from SavedStoryModel
- */
 public class StoryStateModel {
 
-    public static final int MAX_CHAPTERS = 5;
+    /** Project specification: 10 chapters total */
+    public static final int MAX_CHAPTERS = 10;
 
     private int chapter = 1;
-
     private ChoiceModel lastChoice;
-
     private final List<ChoiceRecordModel> history = new ArrayList<>();
 
     public StoryStateModel() { }
@@ -54,10 +41,7 @@ public class StoryStateModel {
         return Collections.unmodifiableList(history);
     }
 
-    /**
-     * REQUIRED by save/load system.
-     * Replaces the entire choice history list.
-     */
+    /** Used during save/load */
     public void setChoiceHistory(List<ChoiceRecordModel> restored) {
         history.clear();
         if (restored != null) {
@@ -93,10 +77,5 @@ public class StoryStateModel {
         if (record != null) {
             history.add(record);
         }
-    }
-
-    /** INTERNAL — allows MainController to access raw history if needed */
-    public List<ChoiceRecordModel> getMutableChoiceHistory() {
-        return history;
     }
 }

@@ -12,7 +12,7 @@ import model.story.SceneModel;
  * - Wraps OpenAIClient safely
  * - Disables AI gracefully if API key/config is missing
  */
-public class OpenAIService implements StoryGenerator {
+public class OpenAIService {
 
     private OpenAIClient client;
     private boolean enabled = true;
@@ -28,12 +28,10 @@ public class OpenAIService implements StoryGenerator {
         }
     }
 
-    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
-    @Override
     public SceneModel generateScene(String prompt) throws Exception {
 
         if (!enabled) {
