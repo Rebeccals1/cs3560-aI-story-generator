@@ -1,62 +1,104 @@
 package model.story;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * StoryModel
+ *
+ * Central domain model for the AI Story Generator.
+ */
 public class StoryModel {
-    private Character character;
-    private World world;
-    private StoryState state;
-    private List<Scene> scenes;
 
-    public StoryModel() {
-        this.state = new StoryState();
-        this.scenes = new ArrayList<>();
+    private final StoryStateModel state = new StoryStateModel();
+
+    private CharacterModel character;
+    private WorldModel world;
+    private String genre;
+
+    /** Canonical story scenes, in order */
+    private final List<SceneModel> scenes = new ArrayList<>();
+
+    /** The current active scene */
+    private SceneModel currentScene;
+
+    /* ==========================================================
+       GETTERS
+       ========================================================== */
+
+    public StoryStateModel getState() { return state; }
+    public CharacterModel getCharacter() { return character; }
+    public WorldModel getWorld() { return world; }
+    public SceneModel getCurrentScene() { return currentScene; }
+
+    /** Unmodifiable list of all scenes in order */
+    public List<SceneModel> getAllScenes() {
+        return Collections.unmodifiableList(scenes);
     }
 
-    // Character
-    public void setCharacter(Character character) {
-        this.character = character;
-    }
+    public String getGenre() { return genre; }
 
-    public Character getCharacter() {
-        return character;
-    }
+    /* ==========================================================
+       SETTERS
+       ========================================================== */
 
-    // World
-    public void setWorld(World world) {
-        this.world = world;
-    }
+    public void setCharacter(CharacterModel c) { this.character = c; }
+    public void setWorld(WorldModel w) { this.world = w; }
+    public void setGenre(String genre) { this.genre = genre; }
 
-    public World getWorld() {
-        return world;
-    }
-
-    // Scenes
-    public void addScene(Scene scene) {
-        scenes.add(scene);
-        // Chapter advancement is handled by the controller, not here
-    }
-
-    public Scene getCurrentScene() {
-        if (scenes.isEmpty()) {
-            return null;
+    /**
+     * Normal gameplay progression ONLY.
+     * Adds scene to history and sets it current.
+     * Do NOT call this method during load operations.
+     */
+    public void setCurrentScene(SceneModel scene) {
+        this.currentScene = scene;
+        if (scene != null) {
+            scenes.add(scene);
         }
-        return scenes.get(scenes.size() - 1);
     }
 
-    public List<Scene> getAllScenes() {
-        return scenes;
+    /* ==========================================================
+       LOADING SAVED GAMES
+       ========================================================== */
+
+    public void setScenes(List<SceneModel> loadedScenes) {
+        scenes.clear();
+        if (loadedScenes != null) {
+            scenes.addAll(loadedScenes);
+        }
     }
 
-    // Story State
-    public StoryState getState() {
-        return state;
+    public void restoreCurrentSceneAfterLoad() {
+        currentScene = scenes.isEmpty() ? null : scenes.get(scenes.size() - 1);
     }
 
-    // Reset story for new run
+    public void setCurrentChapter(int chapter) {
+        state.setChapter(chapter);
+    }
+
+    public void setChoiceHistory(List<ChoiceRecordModel> history) {
+        state.setChoiceHistory(history);
+    }
+
+    /* ==========================================================
+       CHAPTER MANAGEMENT
+       ========================================================== */
+
+    public void nextChapter() { state.nextChapter(); }
+
+    public boolean isComplete() {
+        return state.getChapter() >= StoryStateModel.MAX_CHAPTERS;
+    }
+
+    /* ==========================================================
+       RESET STORY
+       ========================================================== */
+
     public void reset() {
-        this.state = new StoryState();
-        this.scenes.clear();
+        scenes.clear();
+        currentScene = null;
+        state.reset();
     }
 }

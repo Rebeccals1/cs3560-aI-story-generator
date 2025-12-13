@@ -3,18 +3,29 @@ import view.MainFrame;
 import controller.MainController;
 
 /**
- * Main entry point for the AI Story Generator application
- * Creates and launches the Swing GUI with the game controller
+ * Main
+ *
+ * Entry point for the AI Story Generator desktop application.
+ *
+ * Responsibilities:
+ *   • Bootstraps Swing safely using the EDT
+ *   • Creates MainFrame (UI) and MainController (logic)
+ *   • Wires the controller to the frame (done inside controller constructor)
+ *   • Displays the window
  */
 public class Main {
+
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(() -> {
-            // Create main window and controller
+
+            // Create UI
             MainFrame frame = new MainFrame();
-            MainController controller = new MainController(frame);
-            
-            // Connect controller to UI and display
-            frame.setController(controller);
+
+            // Create controller (this automatically calls frame.setController(this))
+            new MainController(frame);
+
+            // Display UI
             frame.setVisible(true);
         });
     }

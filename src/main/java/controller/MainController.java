@@ -1,193 +1,319 @@
 package controller;
 
-import model.story.Character;
-import model.story.World;
-import model.story.Scene;
-import model.story.Choice;
-import model.story.StoryModel;
-import model.story.SavedStory;
+import model.strategy.AdultMode;
+import model.strategy.ChildFriendlyMode;
+import model.strategy.StoryModeStrategy;
+import model.story.*;
 import service.OpenAIService;
 import service.PromptBuilder;
-import service.StoryLibrary;
+import service.StorySaveSystem;
+import service.CharacterFactory;
+import service.WorldFactory;
 import view.MainFrame;
+import view.components.ErrorDialog;
 
 import javax.swing.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-//Main controller that connects UI, story model, and AI service
-
+/**
+ * MainController
+ *
+ * Core application logic:
+ *   • Handles all UI-driven events
+ *   • Manages the StoryModel lifecycle
+ *   • Generates new scenes using OpenAI (async)
+ *   • Saves / loads progress via StorySaveSystem
+ *
+ * DESIGN PATTERNS:
+ *   - MVC Controller
+ *   - Strategy Pattern (StoryModeStrategy)
+ *   - Factory Pattern (CharacterFactory, WorldFactory)
+ */
 public class MainController {
 
-    private final MainFrame view;
-    private final StoryModel model = new StoryModel();
-    private final OpenAIService ai = new OpenAIService();
+    /* ---------------------------------------------------------
+       Fields
+       --------------------------------------------------------- */
 
-    // Story configuration set by user inputs
-    private String genre = "fantasy";
-    private String length = "Short";
-    private String complexity = "Adult";
-    private String style = "Descriptive";
+    private final MainFrame mainFrame;
+    private final StorySaveSystem saveSystem = new StorySaveSystem();
 
-    public MainController(MainFrame view) {
-        this.view = view;
+    /** Replaced entirely when loading a saved game */
+    private StoryModel storyModel = new StoryModel();
+
+    private final PromptBuilder promptBuilder = new PromptBuilder();
+    private final OpenAIService api = new OpenAIService();
+
+    private String selectedGenre;
+    private String selectedLength;
+    private String selectedComplexity;
+    private String selectedStyle;
+
+    /** Strategy selected at runtime */
+    private StoryModeStrategy modeStrategy;
+
+    /* ---------------------------------------------------------
+       Constructor
+       --------------------------------------------------------- */
+
+    public MainController(MainFrame frame) {
+        this.mainFrame = frame;
+        frame.setController(this);
+
+        // Show AI-disabled popup once at startup
+        if (!api.isEnabled()) {
+            SwingUtilities.invokeLater(() ->
+                    ErrorDialog.showAIDisabled(mainFrame)
+            );
+        }
     }
 
-    // ==================== User Input Handlers ====================
+    /* =========================================================
+       SETUP METHODS
+       ========================================================= */
 
-    public void onGenreSelected(String genreKey) {
-        this.genre = genreKey;
+    public void onGenreSelected(String g) {
+        selectedGenre = g;
+        storyModel.setGenre(g);
     }
 
     public void onCharacterEntered(String name, List<String> traits, String backstory) {
-        if (traits == null) traits = new ArrayList<>();
-        Character c = new Character(name);
-        c.setTraits(traits);
-        c.setBackstory(backstory);
-        model.setCharacter(c);
+        storyModel.setCharacter(
+                CharacterFactory.create(name, traits, backstory)
+        );
     }
 
     public void onWorldEntered(String location, String rule, String history) {
-        World w = new World(location);
-        w.setRule(rule);
-        w.setHistory(history);
-        model.setWorld(w);
+        storyModel.setWorld(
+                WorldFactory.create(location, rule, history)
+        );
     }
 
     public void onControlsSelected(String length, String complexity, String style) {
-        this.length = length;
-        this.complexity = complexity;
-        this.style = style;
+        selectedLength = length;
+        selectedComplexity = complexity;
+        selectedStyle = style;
+
+        modeStrategy = "Child-Friendly".equalsIgnoreCase(complexity)
+                ? new ChildFriendlyMode()
+                : new AdultMode();
+
+        promptBuilder.setModeStrategy(modeStrategy);
     }
 
-    // ==================== Story Generation ====================
+    /* =========================================================
+       STORY FLOW
+       ========================================================= */
 
     public void startGame() {
-        view.showLoading("Generating opening scene…");
-        executeSceneGeneration(() -> {
-            String prompt = PromptBuilder.introWithChoices(
-                    model.getCharacter(), model.getWorld(),
-                    genre, length, complexity, style
-            );
-            Scene s = ai.generateSceneWithChoices(prompt);
-            model.addScene(s);
-            return s;
-        }, scene -> {
-            view.showView(MainFrame.STORY);
-            view.showStory(scene.getSceneText());
-            view.setChoices(scene.getChoiceA(), scene.getChoiceB());
-        }, "Failed to start story");
+        storyModel.reset();
+        requestNextScene(null);
+        mainFrame.showView(MainFrame.STORY);
     }
 
     public void applyChoice(String id) {
-        view.showLoading("Continuing story…");
-        executeSceneGeneration(() -> {
-            Scene current = model.getCurrentScene();
-            if (current == null) throw new IllegalStateException("No current scene.");
 
-            Choice chosen = "A".equalsIgnoreCase(id) ? current.getChoiceA() : current.getChoiceB();
-            model.getState().nextChapter();
+        SceneModel current = storyModel.getCurrentScene();
+        if (current == null || current.isEnding() || storyModel.isComplete())
+            return;
 
-            String prompt = PromptBuilder.nextWithChoices(
-                    current, chosen, genre, length, complexity, style, model.getState()
-            );
-            Scene next = ai.generateSceneWithChoices(prompt);
-            model.addScene(next);
-            return next;
-        }, scene -> {
-            view.showStory(scene.getSceneText());
-            view.setChoices(scene.getChoiceA(), scene.getChoiceB());
-        }, "Failed to continue story");
+        ChoiceModel chosen = switch (id) {
+            case "A" -> current.getChoiceA();
+            case "B" -> current.getChoiceB();
+            case "C" -> current.getChoiceC();
+            default -> null;
+        };
+
+        if (chosen == null) return;
+
+        int chapter = storyModel.getState().getChapter();
+        storyModel.getState().addChoiceRecord(
+                new ChoiceRecordModel(chapter, id, chosen.getText())
+        );
+
+        storyModel.nextChapter();
+        requestNextScene(id);
     }
 
-    private void executeSceneGeneration(SceneSupplier supplier, SceneConsumer consumer, String errorMessage) {
-        new SwingWorker<Scene, Void>() {
+    /* =========================================================
+       ASYNC AI REQUEST
+       ========================================================= */
+
+    private void requestNextScene(String lastChoiceId) {
+
+        int chapter = storyModel.getState().getChapter();
+        mainFrame.showLoading("Generating chapter " + chapter + "...");
+
+        new SwingWorker<SceneModel, Void>() {
+
             @Override
-            protected Scene doInBackground() throws Exception {
-                return supplier.get();
+            protected SceneModel doInBackground() throws Exception {
+                String prompt = promptBuilder.buildStoryPrompt(
+                        storyModel,
+                        lastChoiceId,
+                        selectedLength,
+                        selectedComplexity,
+                        selectedStyle
+                );
+                return api.generateScene(prompt);
             }
 
             @Override
             protected void done() {
-                view.hideLoading();
                 try {
-                    consumer.accept(get());
+                    SceneModel scene = get();
+
+                    // ✅ Force final chapter to become an ending scene
+                    scene = forceEndingIfFinalChapter(scene);
+
+                    storyModel.setCurrentScene(scene);
+
+                    mainFrame.showScene(scene);
+
+                    boolean enable = !(scene.isEnding() || storyModel.isComplete());
+                    mainFrame.getChoicePanel().setButtonsEnabled(enable);
+
                 } catch (Exception ex) {
-                    view.showError(errorMessage, unwrap(ex));
+
+                    // Graceful fallback text instead of blank panel
+                    SceneModel fallback = new SceneModel(
+                            "AI story generation is unavailable.\n\n" +
+                                    "Please configure your OpenAI API key to continue.",
+                            null, null, null,
+                            true
+                    );
+
+                    storyModel.setCurrentScene(fallback);
+                    mainFrame.showScene(fallback);
+                    mainFrame.getChoicePanel().setButtonsEnabled(false);
+
+                    ErrorDialog.show(mainFrame, "AI Error", ex);
+
+                } finally {
+                    mainFrame.hideLoading();
                 }
             }
         }.execute();
     }
 
-    @FunctionalInterface
-    private interface SceneSupplier {
-        Scene get() throws Exception;
+    /**
+     * Ensures the final chapter ALWAYS ends with:
+     *   --- THE END ---
+     * and disables choices permanently.
+     */
+    private SceneModel forceEndingIfFinalChapter(SceneModel scene) {
+
+        int chapter = storyModel.getState().getChapter();
+        if (chapter != StoryStateModel.MAX_CHAPTERS) {
+            return scene;
+        }
+
+        String text = (scene != null && scene.getStoryText() != null)
+                ? scene.getStoryText().trim()
+                : "";
+
+        if (!text.isEmpty()) text += "\n\n";
+        text += "--- THE END ---";
+
+        return new SceneModel(
+                text,
+                new ChoiceModel("A", "The End"),
+                new ChoiceModel("B", "The End"),
+                new ChoiceModel("C", "The End"),
+                true
+        );
     }
 
-    @FunctionalInterface
-    private interface SceneConsumer {
-        void accept(Scene scene);
-    }
-
-    // ==================== Navigation ====================
+    /* =========================================================
+       LIBRARY
+       ========================================================= */
 
     public void openLibrary() {
-        view.showView(MainFrame.LIBRARY);
+        mainFrame.showView(MainFrame.LIBRARY);
     }
+
+    /* =========================================================
+       SAVE / LOAD
+       ========================================================= */
 
     public void saveCurrentStory() {
-        // Check if there's a story to save
-        if (model.getAllScenes().isEmpty()) {
-            view.showError("No Story to Save", new Exception("Please generate a story first before saving."));
-            return;
+        try {
+            SavedStoryModel saved = new SavedStoryModel(
+                    null,
+                    storyModel.getGenre(),
+                    storyModel.getCharacter(),
+                    storyModel.getWorld(),
+                    storyModel.getAllScenes(),
+                    "{}"
+            );
+
+            saved.setChoiceHistory(
+                    new ArrayList<>(storyModel.getState().getChoiceHistory())
+            );
+
+            File saveFile = saveSystem.saveGame(saved);
+
+            JOptionPane.showMessageDialog(
+                    mainFrame,
+                    "Saved:\n" + saveFile.getName()
+            );
+
+        } catch (Exception ex) {
+            ErrorDialog.show(mainFrame, "Save Error", ex);
         }
-        
-        // Ask user for a title
-        String title = JOptionPane.showInputDialog(view, 
-            "Enter a title for your story:", 
-            "Save Story", 
-            JOptionPane.QUESTION_MESSAGE);
-        
-        if (title == null) {
-            // User cancelled
-            return;
-        }
-        
-        // Save in background thread
-        new SwingWorker<SavedStory, Void>() {
-            @Override
-            protected SavedStory doInBackground() throws Exception {
-                return StoryLibrary.getInstance().saveStory(
-                    model, genre, title, length, complexity, style
-                );
-            }
-            
-            @Override
-            protected void done() {
-                try {
-                    SavedStory saved = get();
-                    JOptionPane.showMessageDialog(view, 
-                        "Story saved successfully!\n\n" +
-                        "Title: " + saved.getDisplayTitle() + "\n" +
-                        "Chapters: " + saved.getTotalChapters() + "\n" +
-                        "Saved: " + saved.getFormattedCreatedDate(),
-                        "Story Saved", 
-                        JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception ex) {
-                    view.showError("Failed to save story", unwrap(ex));
-                }
-            }
-        }.execute();
     }
 
-    // ==================== Utility ====================
+    public void loadSaveFile(File file) {
+        try {
+            SavedStoryModel saved = saveSystem.loadGame(file);
+            if (saved == null) {
+                JOptionPane.showMessageDialog(mainFrame, "Invalid save file.");
+                return;
+            }
 
-    // Unwraps nested RuntimeExceptions to find the root cause
-    private static Exception unwrap(Exception ex) {
-        Throwable t = ex;
-        while (t instanceof RuntimeException && t.getCause() != null) {
-            t = t.getCause();
+            restoreLoadedStory(saved);
+
+            SceneModel last = storyModel.getCurrentScene();
+            mainFrame.showScene(last);
+            mainFrame.showView(MainFrame.STORY);
+
+        } catch (Exception ex) {
+            ErrorDialog.show(mainFrame, "Load Error", ex);
         }
-        return (t instanceof Exception) ? (Exception) t : new Exception(t);
     }
+
+    /* =========================================================
+       RESTORE STORY (TEST + UI SHARED LOGIC)
+       ========================================================= */
+
+    public void restoreLoadedStory(SavedStoryModel saved) {
+
+        if (saved == null) {
+            throw new IllegalArgumentException("Saved story cannot be null");
+        }
+
+        storyModel = new StoryModel();
+
+        storyModel.setGenre(saved.getGenre());
+        storyModel.setCharacter(saved.getCharacter());
+        storyModel.setWorld(saved.getWorld());
+
+        storyModel.setScenes(new ArrayList<>(saved.getScenes()));
+        storyModel.setChoiceHistory(saved.getChoiceHistory());
+
+        // NOTE: you said "chapters, not scenes" — we can adjust this next if needed.
+        storyModel.setCurrentChapter(saved.getScenes().size());
+        storyModel.restoreCurrentSceneAfterLoad();
+    }
+
+    /* =========================================================
+       TEST SUPPORT
+       ========================================================= */
+
+    public StoryModel getStoryModel() { return storyModel; }
+    public String getSelectedLength() { return selectedLength; }
+    public String getSelectedComplexity() { return selectedComplexity; }
+    public String getSelectedStyle() { return selectedStyle; }
 }

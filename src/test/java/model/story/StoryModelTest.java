@@ -9,44 +9,122 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StoryModelTest {
 
     @Test
-    void testCharacterStorage() {
-        StoryModel model = new StoryModel();
-        Character c = new Character("Elowen");
+    void testSetCharacterAndWorldAndGenre() {
+        StoryModel m = new StoryModel();
 
-        model.setCharacter(c);
+        CharacterModel c = new CharacterModel("Aria");
+        WorldModel w = new WorldModel("Eldoria", "Magic rules", "Ancient wars");
 
-        assertEquals(c, model.getCharacter());
+        m.setCharacter(c);
+        m.setWorld(w);
+        m.setGenre("Fantasy");
+
+        assertEquals("Aria", m.getCharacter().getName());
+        assertEquals("Eldoria", m.getWorld().getLocation());
+        assertEquals("Fantasy", m.getGenre());
     }
 
     @Test
-    void testWorldStorage() {
-        StoryModel model = new StoryModel();
-        World w = new World("Forest");
+    void testSetCurrentSceneAppendsToList() {
+        StoryModel m = new StoryModel();
 
-        model.setWorld(w);
+        SceneModel s1 = new SceneModel("Scene 1");
+        SceneModel s2 = new SceneModel("Scene 2");
 
-        assertEquals(w, model.getWorld());
+        m.setCurrentScene(s1);
+        m.setCurrentScene(s2);
+
+        assertEquals(2, m.getAllScenes().size());
+        assertEquals("Scene 2", m.getCurrentScene().getStoryText());
     }
 
     @Test
-    void testAddScene() {
-        StoryModel model = new StoryModel();
-        Scene s = new Scene("Intro", new Choice("A", "Go"), new Choice("B", "Stop"));
+    void testSetScenesReplacesAllScenes() {
+        StoryModel m = new StoryModel();
 
-        model.addScene(s);
+        SceneModel old1 = new SceneModel("Old A");
+        SceneModel old2 = new SceneModel("Old B");
 
-        assertEquals(1, model.getAllScenes().size());
-        assertEquals(s, model.getCurrentScene());
+        m.setCurrentScene(old1);
+        m.setCurrentScene(old2);
+
+        assertEquals(2, m.getAllScenes().size());
+
+        List<SceneModel> newScenes = List.of(
+                new SceneModel("New 1"),
+                new SceneModel("New 2"),
+                new SceneModel("New 3")
+        );
+
+        m.setScenes(newScenes);
+
+        assertEquals(3, m.getAllScenes().size());
+        assertEquals("New 1", m.getAllScenes().get(0).getStoryText());
     }
 
     @Test
-    void testReset() {
-        StoryModel model = new StoryModel();
-        model.addScene(new Scene("Test", null, null));
+    void testRestoreCurrentSceneAfterLoad() {
+        StoryModel m = new StoryModel();
 
-        model.reset();
+        List<SceneModel> scenes = List.of(
+                new SceneModel("First"),
+                new SceneModel("Second"),
+                new SceneModel("Third")
+        );
 
-        assertTrue(model.getAllScenes().isEmpty());
-        assertEquals(1, model.getState().getChapter());
+        m.setScenes(scenes);
+        m.restoreCurrentSceneAfterLoad();
+
+        assertNotNull(m.getCurrentScene());
+        assertEquals("Third", m.getCurrentScene().getStoryText());
+    }
+
+    @Test
+    void testSetCurrentChapterUpdatesState() {
+        StoryModel m = new StoryModel();
+        m.setCurrentChapter(5);
+        assertEquals(5, m.getState().getChapter());
+    }
+
+    @Test
+    void testSetChoiceHistory() {
+        StoryModel m = new StoryModel();
+
+        List<ChoiceRecordModel> history = List.of(
+                new ChoiceRecordModel(1, "A", "Go"),
+                new ChoiceRecordModel(2, "B", "Stay")
+        );
+
+        m.setChoiceHistory(history);
+
+        assertEquals(2, m.getState().getChoiceHistory().size());
+        assertEquals("A", m.getState().getChoiceHistory().get(0).getChoiceId());
+    }
+
+    @Test
+    void testNextChapter() {
+        StoryModel m = new StoryModel();
+        assertEquals(1, m.getState().getChapter());
+
+        m.nextChapter();
+        assertEquals(2, m.getState().getChapter());
+    }
+
+    @Test
+    void testResetClearsScenesAndHistory() {
+        StoryModel m = new StoryModel();
+
+        m.setCurrentScene(new SceneModel("Scene X"));
+        m.getState().addChoiceRecord(new ChoiceRecordModel(1, "A", "Test"));
+
+        assertEquals(1, m.getAllScenes().size());
+        assertEquals(1, m.getState().getChoiceHistory().size());
+
+        m.reset();
+
+        assertEquals(0, m.getAllScenes().size());
+        assertEquals(0, m.getState().getChoiceHistory().size());
+        assertEquals(1, m.getState().getChapter());
+        assertNull(m.getCurrentScene());
     }
 }

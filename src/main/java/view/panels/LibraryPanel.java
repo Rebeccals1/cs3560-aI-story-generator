@@ -1,238 +1,237 @@
 package view.panels;
 
-import model.story.SavedStory;
-import service.StoryLibrary;
+import model.story.SavedStoryModel;
+import model.story.SceneModel;
+import service.StorySaveSystem;
+import view.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
+import java.io.File;
 
-// LibraryPanel - Shows saved stories and allows viewing/managing them
+/**
+ * LibraryPanel
+ *
+ * Purpose:
+ *   • Shows all saved .json files inside /saves folder
+ *   • Allows the user to:
+ *        ✔ Refresh save list
+ *        ✔ Load a selected save file into MainController
+ *        ✔ Delete a selected save file
+ *
+ * Notes:
+ *   • Compatible with StorySaveSystem (listSaves, loadGame, saveGame)
+ *   • Requires MainFrame injection via setMainFrame()
+ */
 public class LibraryPanel extends JPanel {
-    
-    private final DefaultListModel<SavedStory> listModel;
-    private final JList<SavedStory> storyList;
-    private final JTextArea previewArea;
-    private final JLabel statusLabel;
 
+    /* ============================================================
+       Fields
+       ============================================================ */
+
+    private final StorySaveSystem saveSystem = new StorySaveSystem();
+
+    private final DefaultListModel<File> listModel = new DefaultListModel<>();
+    private final JList<File> saveList = new JList<>(listModel);
+
+    private MainFrame mainFrame;   // injected from MainFrame
+    private final JTextArea previewArea = new JTextArea();
+
+
+    /* ============================================================
+       Constructor
+       ============================================================ */
     public LibraryPanel() {
         setLayout(new BorderLayout());
-        
-        // Create components
-        listModel = new DefaultListModel<>();
-        storyList = new JList<>(listModel);
-        previewArea = new JTextArea();
-        statusLabel = new JLabel("Loading library...");
-        
-        initializeComponents();
-        layoutComponents();
-        loadStoriesFromLibrary();
+        buildUI();
+        refreshList();
     }
-    
-    private void initializeComponents() {
-        // Configure story list
-        storyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        storyList.setCellRenderer(new StoryListRenderer());
-        storyList.addListSelectionListener(e -> {
+
+    /** Called only by MainFrame */
+    public void setMainFrame(MainFrame frame) {
+        this.mainFrame = frame;
+    }
+
+
+    /* ============================================================
+       UI Layout
+       ============================================================ */
+    private void buildUI() {
+
+        /* ----- LEFT PANEL: Save List ----- */
+        saveList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        saveList.setCellRenderer(new FileRenderer());
+
+        saveList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                showSelectedStoryPreview();
+                showPreview();
             }
         });
-        
-        // Configure preview area
+
+        JScrollPane listScroll = new JScrollPane(saveList);
+
+        JButton refreshBtn = new JButton("Refresh");
+        JButton loadBtn = new JButton("Load Game");
+        JButton deleteBtn = new JButton("Delete");
+
+        refreshBtn.addActionListener(e -> refreshList());
+        loadBtn.addActionListener(this::loadGame);
+        deleteBtn.addActionListener(this::deleteSave);
+
+        JPanel leftButtons = new JPanel(new FlowLayout());
+        leftButtons.add(refreshBtn);
+        leftButtons.add(loadBtn);
+        leftButtons.add(deleteBtn);
+
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(listScroll, BorderLayout.CENTER);
+        leftPanel.add(leftButtons, BorderLayout.SOUTH);
+
+
+        /* ----- RIGHT PANEL: Preview ----- */
         previewArea.setEditable(false);
         previewArea.setLineWrap(true);
         previewArea.setWrapStyleWord(true);
-        previewArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        previewArea.setText("Select a story from the list to preview it here.");
-        
-        // Configure status label
-        statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    }
-    
-    private void layoutComponents() {
-        // Left panel - story list
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.setBorder(BorderFactory.createTitledBorder("Saved Stories"));
-        leftPanel.add(new JScrollPane(storyList), BorderLayout.CENTER);
-        
-        // Add refresh and delete buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        
-        JButton refreshButton = new JButton("Refresh");
-        JButton deleteButton = new JButton("Delete");
-        JButton exportButton = new JButton("Export");
-        
-        refreshButton.addActionListener(e -> loadStoriesFromLibrary());
-        deleteButton.addActionListener(this::deleteSelectedStory);
-        exportButton.addActionListener(this::exportSelectedStory);
-        
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(deleteButton);
-        buttonPanel.add(exportButton);
-        leftPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
-        // Right panel - preview
+        previewArea.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+
         JPanel rightPanel = new JPanel(new BorderLayout());
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Story Preview"));
         rightPanel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
-        
-        // Split pane
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        splitPane.setDividerLocation(300);
-        
-        add(splitPane, BorderLayout.CENTER);
-        add(statusLabel, BorderLayout.SOUTH);
+
+        /* ----- SPLIT VIEW ----- */
+        JSplitPane split = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                leftPanel,
+                rightPanel
+        );
+        split.setDividerLocation(300);
+
+        add(split, BorderLayout.CENTER);
     }
-    
-    private void loadStoriesFromLibrary() {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                statusLabel.setText("Loading stories...");
-                List<SavedStory> stories = StoryLibrary.getInstance().getAllSavedStories();
-                
-                listModel.clear();
-                for (SavedStory story : stories) {
-                    listModel.addElement(story);
-                }
-                
-                statusLabel.setText("Loaded " + stories.size() + " stories");
-                
-                if (stories.isEmpty()) {
-                    previewArea.setText("No saved stories found.\n\nCreate and save a story to see it appear here!");
-                }
-                
-            } catch (Exception e) {
-                statusLabel.setText("Error loading stories: " + e.getMessage());
-                previewArea.setText("Error loading stories: " + e.getMessage());
-            }
-        });
-    }
-    
-    private void showSelectedStoryPreview() {
-        SavedStory selected = storyList.getSelectedValue();
-        if (selected == null) {
-            previewArea.setText("Select a story from the list to preview it here.");
+
+
+    /* ============================================================
+       REFRESH SAVE LIST
+       ============================================================ */
+    private void refreshList() {
+        listModel.clear();
+
+        File[] saves = saveSystem.listSaves();
+        if (saves == null || saves.length == 0) {
+            previewArea.setText("No save files found.\nStart a story and click Save.");
             return;
         }
-        
+
+        for (File f : saves) {
+            listModel.addElement(f);
+        }
+    }
+
+
+    /* ============================================================
+       SHOW PREVIEW FOR SELECTED SAVE
+       ============================================================ */
+    private void showPreview() {
+        File file = saveList.getSelectedValue();
+
+        if (file == null) {
+            previewArea.setText("Select a save file.");
+            return;
+        }
+
         try {
-            // Load full story details
-            SavedStory fullStory = StoryLibrary.getInstance().loadStory(selected.getId());
-            
-            StringBuilder preview = new StringBuilder();
-            preview.append("=== ").append(fullStory.getDisplayTitle()).append(" ===\n\n");
-            preview.append("Genre: ").append(fullStory.getGenre()).append("\n");
-            preview.append("Created: ").append(fullStory.getFormattedCreatedDate()).append("\n");
-            preview.append("Chapters: ").append(fullStory.getTotalChapters()).append("\n\n");
-            
-            if (fullStory.getCharacter() != null) {
-                preview.append("Character: ").append(fullStory.getCharacter().getName()).append("\n");
-                if (fullStory.getCharacter().getBackstory() != null && !fullStory.getCharacter().getBackstory().isEmpty()) {
-                    preview.append("Backstory: ").append(fullStory.getCharacter().getBackstory()).append("\n");
-                }
+            SavedStoryModel saved = saveSystem.loadGame(file);
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("Title: ").append(saved.getDisplayTitle()).append("\n")
+                    .append("Genre: ").append(saved.getGenre()).append("\n")
+                    .append("Chapters: ").append(saved.getScenes().size()).append("\n")
+                    .append("Created: ").append(saved.getFormattedCreatedDate()).append("\n\n");
+
+            if (!saved.getScenes().isEmpty()) {
+                SceneModel first = saved.getScenes().get(0);
+                String text = first.getStoryText();
+                text = text == null ? "" : text;
+
+                sb.append("Chapter 1 Preview:\n")
+                        .append(text.substring(0, Math.min(200, text.length())))
+                        .append(text.length() > 200 ? "..." : "");
             }
-            
-            if (fullStory.getWorld() != null) {
-                preview.append("Setting: ").append(fullStory.getWorld().getLocation()).append("\n\n");
-            }
-            
-            preview.append("=== STORY ===\n\n");
-            
-            if (fullStory.getScenes() != null && !fullStory.getScenes().isEmpty()) {
-                for (int i = 0; i < Math.min(3, fullStory.getScenes().size()); i++) {
-                    preview.append("Chapter ").append(i + 1).append(":\n");
-                    preview.append(fullStory.getScenes().get(i).getSceneText()).append("\n\n");
-                }
-                
-                if (fullStory.getScenes().size() > 3) {
-                    preview.append("... and ").append(fullStory.getScenes().size() - 3).append(" more chapters");
-                }
-            }
-            
-            previewArea.setText(preview.toString());
-            previewArea.setCaretPosition(0); // Scroll to top
-            
-        } catch (Exception e) {
-            previewArea.setText("Error loading story details: " + e.getMessage());
-        }
-    }
-    
-    private void deleteSelectedStory(ActionEvent e) {
-        SavedStory selected = storyList.getSelectedValue();
-        if (selected == null) {
-            JOptionPane.showMessageDialog(this, "Please select a story to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        
-        int result = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to delete the story:\n\"" + selected.getDisplayTitle() + "\"?\n\nThis cannot be undone.", 
-            "Confirm Delete", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.WARNING_MESSAGE);
-        
-        if (result == JOptionPane.YES_OPTION) {
-            boolean deleted = StoryLibrary.getInstance().deleteStory(selected.getId());
-            if (deleted) {
-                loadStoriesFromLibrary(); // Refresh the list
-                previewArea.setText("Story deleted successfully.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to delete the story.", "Delete Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    
-    private void exportSelectedStory(ActionEvent e) {
-        SavedStory selected = storyList.getSelectedValue();
-        if (selected == null) {
-            JOptionPane.showMessageDialog(this, "Please select a story to export.", "No Selection", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        
-        try {
-            SavedStory fullStory = StoryLibrary.getInstance().loadStory(selected.getId());
-            
-            StringBuilder export = new StringBuilder();
-            export.append(fullStory.getDisplayTitle()).append("\n");
-            export.append("=".repeat(fullStory.getDisplayTitle().length())).append("\n\n");
-            
-            if (fullStory.getScenes() != null) {
-                for (int i = 0; i < fullStory.getScenes().size(); i++) {
-                    export.append("Chapter ").append(i + 1).append("\n");
-                    export.append("-".repeat(20)).append("\n");
-                    export.append(fullStory.getScenes().get(i).getSceneText()).append("\n\n");
-                }
-            }
-            
-            // Show in a dialog for now (could be extended to save to file)
-            JTextArea exportArea = new JTextArea(export.toString());
-            exportArea.setEditable(false);
-            exportArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-            
-            JScrollPane scrollPane = new JScrollPane(exportArea);
-            scrollPane.setPreferredSize(new Dimension(600, 400));
-            
-            JOptionPane.showMessageDialog(this, scrollPane, "Exported Story: " + selected.getDisplayTitle(), JOptionPane.INFORMATION_MESSAGE);
-            
+
+            previewArea.setText(sb.toString());
+
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Failed to export story: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+            previewArea.setText("Failed to read save:\n" + ex.getMessage());
         }
     }
-    
-    // Custom renderer for the story list
-    private static class StoryListRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            
-            if (value instanceof SavedStory) {
-                SavedStory story = (SavedStory) value;
-                setText("<html><b>" + story.getDisplayTitle() + "</b><br>" +
-                       "<small>" + story.getGenre() + " • " + story.getTotalChapters() + " chapters • " + 
-                       story.getFormattedCreatedDate() + "</small></html>");
+
+
+    /* ============================================================
+       LOAD GAME
+       ============================================================ */
+    private void loadGame(ActionEvent e) {
+        File file = saveList.getSelectedValue();
+        if (file == null) {
+            JOptionPane.showMessageDialog(this, "Select a save file to load.");
+            return;
+        }
+
+        try {
+            if (mainFrame == null || mainFrame.getController() == null) {
+                throw new IllegalStateException("MainFrame or Controller not initialized.");
             }
-            
+
+            mainFrame.getController().loadSaveFile(file);
+
+            JOptionPane.showMessageDialog(this,
+                    "Loaded save:\n" + file.getName());
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading game:\n" + ex.getMessage());
+        }
+    }
+
+
+    /* ============================================================
+       DELETE SAVE
+       ============================================================ */
+    private void deleteSave(ActionEvent e) {
+        File file = saveList.getSelectedValue();
+        if (file == null) return;
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Delete this save file?\n" + file.getName(),
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        if (file.delete()) {
+            refreshList();
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to delete save file.");
+        }
+    }
+
+
+    /* ============================================================
+       FILE NAME RENDERER (Cleaner list view)
+       ============================================================ */
+    private static class FileRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(
+                JList<?> list, Object value, int index, boolean selected, boolean focus) {
+
+            super.getListCellRendererComponent(list, value, index, selected, focus);
+
+            if (value instanceof File f) {
+                setText(f.getName());
+            }
+
             return this;
         }
     }
