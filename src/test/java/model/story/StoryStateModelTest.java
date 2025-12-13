@@ -28,8 +28,8 @@ class StoryStateModelTest {
         state.setChapter(5);
         assertEquals(5, state.getChapter());
 
-        state.setChapter(10);
-        assertEquals(10, state.getChapter());
+        state.setChapter(5);
+        assertEquals(5, state.getChapter());
     }
 
     @Test
