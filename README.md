@@ -100,60 +100,57 @@ src/main/java/
 ## UML Diagram
 ```
 +--------------------+
-|     Main           |
+|        Main        |
 +--------------------+
 | + main()           |
-+---------+----------+
-          |
-          v
++----------+---------+
+           |
+           v
 +--------------------+        uses        +--------------------+
-|  MainController    |------------------>|   PromptBuilder    |
+|   MainController   |------------------>|   PromptBuilder    |
 +--------------------+                   +--------------------+
 | - storyModel       |                   | - modeStrategy     |
 | - saveSystem       |                   +--------------------+
 | - api              |
 | - modeStrategy     |        uses        +--------------------+
-+---------+----------+------------------>|  OpenAIService     |
-          |                               +--------------------+
-          | uses
-          v
++----------+---------+------------------>|   OpenAIService    |
+           |                               +--------------------+
+           | uses
+           v
 +--------------------+
-|   StoryModel       |
+|    StoryModel      |
 +--------------------+
 | - character        |
 | - world            |
+| - genre            |
 | - scenes           |
 | - currentScene     |
 | - state            |
-+----+-----------+---+
-     |           |
-     |           |
-     v           v
-+----------+   +----------------+
-| Character|   |   WorldModel   |
-|  Model   |   +----------------+
-+----------+   | location       |
-               | rule           |
-               | history        |
-               +----------------+
++----◆---------◆----+
+     |         |
+     |         |
+     v         v
++-------------+   +----------------+
+| Character   |   |  WorldModel    |
+|   Model     |   +----------------+
++-------------+   | location       |
+                  | rule           |
+                  | history        |
+                  +----------------+
 
+         ◆
+         |
+         v
 +--------------------+
-| StoryStateModel    |
+|  StoryStateModel   |
 +--------------------+
 | - chapter          |
 | - choiceHistory    |
 | + nextChapter()    |
 | + isComplete()     |
-+--------------------+
-
-+--------------------+
-|    SceneModel      |
-+--------------------+
-| storyText          |
-| choiceA/B/C        |
-| ending             |
-+--------------------+
-
++---------◆----------+
+          |
+          v
 +--------------------+
 | ChoiceRecordModel  |
 +--------------------+
@@ -161,6 +158,18 @@ src/main/java/
 | choiceId           |
 | description        |
 +--------------------+
+
+        ◆
+        |
+        v
++--------------------+
+|    SceneModel      |
++--------------------+
+| storyText          |
+| choiceA / B / C    |
+| ending             |
++--------------------+
+
 ```
 ## Strategy Pattern
 ```
