@@ -51,18 +51,7 @@ Solution: We had to use fake API clients, override internal methods like sendHtt
 
 This led to a more professional testing structure and increased confidence in our core logic.
 
-### Challenge 7: Graceful Failure When AI Is Unavailable
-Problem: If the API key was missing or invalid, the application initially failed at startup or during story generation.
-
-Solution:
-We introduced a **Factory-based fallback system**:
-- `StoryGeneratorFactory` selects the generator at runtime  
-- `OpenAIService` is used when AI is enabled  
-- `OfflineStoryGenerator` provides a safe placeholder when AI is unavailable  
-
-The UI displays a clear popup explaining the situation instead of crashing.
-
-### Challenge 8: Implementing AI Image generation
+### Challenge 7: Implementing AI Image generation
 Problem: We experimented with AI image generation but encountered frequent rate-limit and token-usage issues.
 
 Solution: The feature was removed to preserve reliability and stay within API usage limits.
