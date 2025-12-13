@@ -47,102 +47,55 @@
 ```
 src/main/java/
 ├── controller/
-│ └── MainController.java
-│ # MVC Controller: handles UI events, async API calls, and story flow
+│   └── MainController.java
+│       # MVC controller: UI events, async AI calls, story flow
 │
 ├── model/
-│ ├── story/
-│ │ ├── CharacterModel.java
-│ │ │ # Encapsulated character data (OOP Encapsulation)
-│ │ │
-│ │ ├── ChoiceModel.java
-│ │ │ # Immutable choice value object
-│ │ │
-│ │ ├── ChoiceRecordModel.java
-│ │ │ # Records user decisions for persistence and continuity
-│ │ │
-│ │ ├── SavedStoryModel.java
-│ │ │ # DTO for save/load system (separates persistence from domain)
-│ │ │
-│ │ ├── SceneModel.java
-│ │ │ # Represents a chapter with choices (used polymorphically)
-│ │ │
-│ │ ├── StoryModel.java
-│ │ │ # Core domain aggregate managing character, world, scenes, and state
-│ │ │
-│ │ ├── StoryStateModel.java
-│ │ │ # Tracks chapter progression and completion rules
-│ │ │
-│ │ └── WorldModel.java
-│ │ # Encapsulated world-building data (location, rules, history)
-│ │
-│ ├── strategy/
-│ │ ├── StoryModeStrategy.java
-│ │ │ # Strategy interface defining pluggable storytelling rules
-│ │ │
-│ │ ├── AdultMode.java
-│ │ │ # Concrete strategy for mature tone and complex narratives
-│ │ │
-│ │ └── ChildFriendlyMode.java
-│ │ # Concrete strategy for simplified language and safe content
-│ │
-│ └── OpenAIClient.java
-│ # Singleton API client handling config loading, retries, and HTTP calls
+│   ├── story/
+│   │   ├── CharacterModel.java        # Character data
+│   │   ├── ChoiceModel.java           # Immutable choice value object
+│   │   ├── ChoiceRecordModel.java     # Persisted user decisions
+│   │   ├── SceneModel.java            # Chapter content + choices
+│   │   ├── StoryModel.java            # Core domain aggregate
+│   │   ├── StoryStateModel.java       # Chapter progression rules
+│   │   ├── SavedStoryModel.java       # Save/load DTO
+│   │   └── WorldModel.java            # World-building data
+│   │
+│   ├── strategy/
+│   │   ├── StoryModeStrategy.java     # Pluggable storytelling rules
+│   │   ├── AdultMode.java             # Mature narrative strategy
+│   │   └── ChildFriendlyMode.java     # Safe narrative strategy
+│   │
+│   └── OpenAIClient.java
+│       # Singleton API client (config, retries, HTTP)
 │
 ├── service/
-│ ├── OpenAIService.java
-│ │ # AI-backed story generator mapping prompts to SceneModel
-│ │
-│ ├── CharacterFactory.java
-│ │ # Factory for safe, default-enforced CharacterModel creation
-│ │
-│ ├── WorldFactory.java
-│ │ # Factory for safe, default-enforced WorldModel creation
-│ │
-│ ├── PromptBuilder.java
-│ │ # Builder that constructs compact, token-safe AI prompts
-│ │
-│ ├── StoryLibrary.java
-│ │ # Service for loading saved stories into the library view
-│ │
-│ └── StorySaveSystem.java
-│ # Repository-style service for JSON save/load
+│   ├── OpenAIService.java             # AI-backed scene generation
+│   ├── PromptBuilder.java             # Token-safe prompt construction
+│   ├── CharacterFactory.java          # Default-safe character creation
+│   ├── WorldFactory.java              # Default-safe world creation
+│   ├── StoryLibrary.java              # Saved story library loader
+│   └── StorySaveSystem.java           # JSON save/load repository
 │
 ├── view/
-│ ├── components/
-│ │ ├── ErrorDialog.java
-│ │ │ # Reusable UI component for consistent error popups
-│ │ │
-│ │ └── LoadingIndicator.java
-│ │ # Visual feedback for async operations
-│ │
-│ ├── panels/
-│ │ ├── CharacterPanel.java
-│ │ │ # UI panel for character creation (MVC View)
-│ │ │
-│ │ ├── ChoicePanel.java
-│ │ │ # Displays A/B/C choices and reacts to scene updates
-│ │ │
-│ │ ├── ControlsPanel.java
-│ │ │ # UI for length, complexity, and strategy selection
-│ │ │
-│ │ ├── GenrePanel.java
-│ │ │ # UI for genre selection influencing prompt construction
-│ │ │
-│ │ ├── LibraryPanel.java
-│ │ │ # Displays saved stories
-│ │ │
-│ │ ├── StoryPanel.java
-│ │ │ # Displays story text and embeds choice controls
-│ │ │
-│ │ └── WorldPanel.java
-│ │ # UI panel for world-building input
-│ │
-│ └── MainFrame.java
-│ # Top-level JFrame managing screen switching (MVC View)
+│   ├── components/
+│   │   ├── ErrorDialog.java            # Consistent error popups
+│   │   └── LoadingIndicator.java       # Async loading feedback
+│   │
+│   ├── panels/
+│   │   ├── GenrePanel.java             # Genre selection
+│   │   ├── CharacterPanel.java         # Character creation
+│   │   ├── WorldPanel.java             # World-building input
+│   │   ├── ControlsPanel.java          # Length / mode / style
+│   │   ├── StoryPanel.java             # Story display
+│   │   ├── ChoicePanel.java            # A/B/C choices
+│   │   └── LibraryPanel.java           # Saved stories view
+│   │
+│   └── MainFrame.java
+│       # Top-level JFrame (screen switching)
 │
 └── Main.java
-# Application entry point bootstrapping MVC on the Swing EDT
+    # Application entry point (Swing EDT bootstrap)
 ```
 ## JUnit Testing
 
