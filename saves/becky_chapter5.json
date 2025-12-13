@@ -1,0 +1,115 @@
+{
+  "id" : "bb9cf2df-5106-4208-861c-8746f389d4eb",
+  "title" : "becky's Journey",
+  "genre" : "romance",
+  "character" : {
+    "name" : "becky",
+    "traits" : [ ],
+    "backstory" : ""
+  },
+  "world" : {
+    "location" : "London",
+    "rule" : "",
+    "history" : ""
+  },
+  "scenes" : [ {
+    "storyText" : "Becky stood at the edge of the bustling park in London, feeling the cool breeze on her cheeks. The scent of blooming flowers filled the air, but her mind was elsewhere. Across the path, she caught sight of Jamie, the boy from her art class, sketching under a tree. His concentrated expression always made her heart flutter. Whenever they talked, laughter seemed to brighten even the cloudiest days. Today felt different; the air was thick with unspoken words, and Becky found herself longing to bridge the gap between them.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Becky gathers her courage and approaches Jamie to ask about his drawing."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Becky decides to admire him from afar, feeling too shy to interrupt."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Becky sits nearby, hoping Jamie will notice her and start a conversation."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Becky watched as Jake, the boy with the lively smile who had caught her attention, approached her. Her heart raced as they exchanged glances, his eyes shining like the sun breaking through the clouds. The park felt warmer, almost magical. He smiled and waved, and Becky felt a flutter in her stomach. As he drew closer, the sound of laughter and rustling leaves surrounded them, wrapping them in a cozy bubble of friendship.\n\n'Hey, do you want to explore the rose garden with me?' Jake asked, his voice sweet like the honeyed breeze. Becky smiled, feeling a mix of excitement and nervousness. The thought of walking side by side, sharing stories and laughter, made her heart leap. It was a chance to connect with him, to bridge the gap between friendship and something more.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Agree to explore the rose garden together."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Invite Jake to sit on a nearby bench and chat first."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Suggest playing a game of catch with some other kids nearby."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Becky took a deep breath as Jake smiled at her. She could feel butterflies dancing in her stomach. They walked together through the vibrant streets of London, the air filled with laughter and the scent of fresh pastries from nearby bakeries. Every word they exchanged felt like a secret, pulling them closer with each shared smile. As they reached a charming park, Jake paused, his gaze warm and inviting. \"What do you like to do for fun?\" he asked, his voice softening the bustling world around them.\n\nBecky thought about the answer. She loved painting and dreaming up stories, but all she could think about was how easy it felt to be with him. The sound of laughter from a nearby group made her shy, but there was something special in Jake’s eyes that made her feel brave. She smiled, ready to share a piece of herself, wondering if this moment could be the start of something wonderful.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Becky shares about her love for painting."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Becky suggests they explore the park together."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Becky asks Jake about his favorite hobbies."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Becky felt her heart race as they approached the blooming flower market. The vibrant colors and sweet scents filled the air, making everything feel magical. Jake picked up a bright red rose and handed it to her, a soft smile spreading across his face. Her cheeks flushed pink, and she wondered if he could see the excitement in her eyes. This moment felt special, like it was meant just for them. They strolled among the stalls, laughter echoing as they shared little jokes about the silly hats and funny souvenirs around them. Becky felt light and happy, enjoying the connection blooming between them, just like the flowers nearby.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Becky asks Jake about his favorite flower."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Becky suggests they buy flowers for their friends."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Becky takes a moment to enjoy the view and the moment with Jake."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Becky gazed at the rose Jake handed her, its petals soft and warm in her palm. She felt a flutter in her heart, not just for the beautiful flower, but for the kind gesture that made her feel special. The sun beamed down on them, casting a golden glow as they shared their dreams for the future. \"I want to explore every corner of this city with you,\" Jake said, his eyes shining with excitement. Becky smiled, her cheeks warm as she replied, \"And I want to make memories that will last forever!\" With the flower in hand and hope in their hearts, they walked through the market, laughing and planning their next adventure together. It felt like the beginning of something truly wonderful, and for the first time, the future seemed bright and endless.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "The End"
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "The End"
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "The End"
+    },
+    "ending" : true
+  } ],
+  "choiceHistory" : [ {
+    "chapter" : 1,
+    "choiceId" : "B",
+    "choiceDescription" : "Becky decides to admire him from afar, feeling too shy to interrupt."
+  }, {
+    "chapter" : 2,
+    "choiceId" : "A",
+    "choiceDescription" : "Agree to explore the rose garden together."
+  }, {
+    "chapter" : 3,
+    "choiceId" : "B",
+    "choiceDescription" : "Becky suggests they explore the park together."
+  }, {
+    "chapter" : 4,
+    "choiceId" : "B",
+    "choiceDescription" : "Becky suggests they buy flowers for their friends."
+  } ],
+  "createdAt" : [ 2025, 12, 12, 23, 43, 12, 947102500 ],
+  "lastModified" : [ 2025, 12, 12, 23, 43, 12, 947102500 ],
+  "totalChapters" : 5,
+  "storyConfiguration" : "{}",
+  "shortSummary" : "Becky stood at the edge of the bustling park in London, feeling the cool breeze on her cheeks. The scent of blooming flowers filled the air, but her m...",
+  "formattedCreatedDate" : "Dec 12, 2025 23:43",
+  "displayTitle" : "becky's Journey"
+}

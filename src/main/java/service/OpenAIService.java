@@ -7,93 +7,97 @@ import model.story.ChoiceModel;
 import model.story.SceneModel;
 
 /**
- * OpenAIService — Correct JSON Parsing for OpenAI Chat API
- * Updated to support:
- *   - Missing choices on final chapter ("isEnding": true)
- *   - Cleaner error handling
+ * OpenAIService
+ *
+ * - Wraps OpenAIClient safely
+ * - Disables AI gracefully if API key/config is missing
  */
-public class OpenAIService {
+public class OpenAIService implements StoryGenerator {
 
-    private final OpenAIClient client = OpenAIClient.getInstance();
+    private OpenAIClient client;
+    private boolean enabled = true;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public SceneModel generateScene(String prompt) throws Exception {
-        String raw = client.sendRequest(prompt);
-        return parseOpenAIResponse(raw);
+    public OpenAIService() {
+        try {
+            client = OpenAIClient.getInstance();
+        } catch (IllegalStateException ex) {
+            enabled = false;
+            client = null;
+        }
     }
 
-    /**
-     * Extracts the assistant JSON response, then parses the fields into SceneModel.
-     */
-    private SceneModel parseOpenAIResponse(String raw) throws Exception {
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public SceneModel generateScene(String prompt) throws Exception {
+
+        if (!enabled) {
+            throw new IllegalStateException(
+                    "AI story generation is disabled.\n\n" +
+                            "Missing OPENAI_API_KEY in config.properties."
+            );
+        }
+
+        String raw = client.sendRequest(prompt);
+        return parseResponse(raw);
+    }
+
+    /* =========================================================
+       RESPONSE PARSING
+       ========================================================= */
+
+    private SceneModel parseResponse(String raw) throws Exception {
 
         JsonNode root = mapper.readTree(raw);
-
-        // ------------------------------------------
-        // 1. Extract assistant message content
-        // ------------------------------------------
         JsonNode choicesNode = root.get("choices");
-        if (choicesNode == null || !choicesNode.isArray() || choicesNode.size() == 0) {
-            throw new Exception("OpenAI returned no choices:\n" + raw);
+
+        if (choicesNode == null || choicesNode.isEmpty()) {
+            throw new Exception("OpenAI returned no choices.");
         }
 
         JsonNode message = choicesNode.get(0).get("message");
-        if (message == null || message.get("content") == null) {
-            throw new Exception("Missing assistant message content.\nRaw response:\n" + raw);
-        }
-
         String content = message.get("content").asText();
 
-        // ------------------------------------------
-        // 2. The content ITSELF is the JSON story
-        // ------------------------------------------
         JsonNode storyJson = mapper.readTree(content);
-        if (storyJson == null) {
-            throw new Exception("Assistant message did not contain valid JSON:\n" + content);
-        }
 
-        // Required for ALL chapters
         require(storyJson, "story");
         require(storyJson, "isEnding");
 
-        String storyText = storyJson.get("story").asText("");
-        boolean isEnding = storyJson.get("isEnding").asBoolean(false);
+        String storyText = storyJson.get("story").asText();
+        boolean isEnding = storyJson.get("isEnding").asBoolean();
 
-        // ------------------------------------------
-        // 3. FINAL CHAPTER — NO CHOICES REQUIRED
-        // ------------------------------------------
         if (isEnding) {
-            // Create dummy choices so SceneModel + UI don't crash
-            ChoiceModel A = new ChoiceModel("A", "The End");
-            ChoiceModel B = new ChoiceModel("B", "The End");
-            ChoiceModel C = new ChoiceModel("C", "The End");
-
-            return new SceneModel(storyText, A, B, C, true);
+            return new SceneModel(
+                    storyText,
+                    new ChoiceModel("A", "The End"),
+                    new ChoiceModel("B", "The End"),
+                    new ChoiceModel("C", "The End"),
+                    true
+            );
         }
 
-        // ------------------------------------------
-        // 4. NON-FINAL CHAPTER — CHOICES REQUIRED
-        // ------------------------------------------
-        require(storyJson, "choices");
-        JsonNode choiceJson = storyJson.get("choices");
+        JsonNode c = storyJson.get("choices");
+        require(c, "A");
+        require(c, "B");
+        require(c, "C");
 
-        require(choiceJson, "A");
-        require(choiceJson, "B");
-        require(choiceJson, "C");
-
-        ChoiceModel A = new ChoiceModel("A", choiceJson.get("A").asText(""));
-        ChoiceModel B = new ChoiceModel("B", choiceJson.get("B").asText(""));
-        ChoiceModel C = new ChoiceModel("C", choiceJson.get("C").asText(""));
-
-        return new SceneModel(storyText, A, B, C, false);
+        return new SceneModel(
+                storyText,
+                new ChoiceModel("A", c.get("A").asText()),
+                new ChoiceModel("B", c.get("B").asText()),
+                new ChoiceModel("C", c.get("C").asText()),
+                false
+        );
     }
 
-    /**
-     * Helper Throws Clean Errors Instead of NullPointer Exceptions
-     */
-    private void require(JsonNode node, String fieldName) throws Exception {
-        if (node == null || node.get(fieldName) == null || node.get(fieldName).isNull()) {
-            throw new Exception("Missing required field \"" + fieldName + "\" in story JSON.");
+    private void require(JsonNode node, String field) throws Exception {
+        if (node == null || node.get(field) == null) {
+            throw new Exception("Missing required field: " + field);
         }
     }
 }

@@ -1,0 +1,115 @@
+{
+  "id" : "fad9cc35-fa30-4c72-b419-126d8316f6f3",
+  "title" : "Roberta's Journey",
+  "genre" : "sci-fi",
+  "character" : {
+    "name" : "Roberta",
+    "traits" : [ "Curious" ],
+    "backstory" : "I'm an alien living on earth"
+  },
+  "world" : {
+    "location" : "Los Angeles",
+    "rule" : "",
+    "history" : "Cyberpunk"
+  },
+  "scenes" : [ {
+    "storyText" : "In the neon underbelly of Los Angeles, Roberta stood at the edge of the hovercraft launch pad, the pulsating lights of the city reflecting in her wide eyes. She had always been curious about the rumored trans-dimensional gateways, whispers of a world where dreams and reality intertwined, a place where her suppressed desires could take flight. Driven by an insatiable longing for something greater, she could feel the low hum of the craft vibrating through her veins, urging her to step into the unknown.\n\nA figure appeared beside her, cloaked in a shimmering fabric that rippled like water. \"Are you ready to leave all you know behind?\" the stranger asked, their voice smooth yet laden with secrets. Roberta glanced back at her life, a montage of sterile routines and muted emotions, and felt a tremor of excitement that almost drowned her hesitation. This was a choice that could either liberate her or chain her further into the mundane.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Step onto the hovercraft and begin the journey into the unknown."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Reject the offer and return to her predictable life."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Ask the stranger more about the gateway before deciding."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "As the hovercraft soared above the luminous sprawl of Los Angeles, Roberta felt a mixture of exhilaration and dread. The city below, a labyrinth of shadows and secrets, pulsed with untold stories. She had chosen the route that led to Tower Omega, rumored to be a hub for rogue AIs and lost technological wonders. Each twist in the sky was a reminder of her insatiable curiosity, driving her ever closer to the unknown. The hum of the engines was a distant thrum to her internal conflict; was she seeking knowledge, or risking the very essence of her humanity?",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Approach Tower Omega directly, seeking the rogue AIs."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Detour to investigate a mysterious signal pinging on her device."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Return to the city and gather more information from the underground network."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Roberta steadied herself as the hovercraft glided towards the Old District, an area long forgotten by the shimmering neon lights of New Los Angeles. Below, the crumbled remnants of the past stood in stark contrast to the towering skyscrapers; relics of a time when humanity's ambition seemed limitless. An electric tension hung in the air, whispering secrets that both enticed and frightened her. As she descended, a flicker of movement caught her eye—a figure cloaked in shadows, gesturing urgently. Roberta's heart raced, torn between the reckless curiosity that drove her and the caution that warned her of the dangers lurking in the darkness. The choice before her was clear, yet fraught with uncertainty. Should she pursue the enigmatic figure or explore the relics of humanity's forgotten past?",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Approach the cloaked figure and see what they want."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Investigate the ruins of the Old District for clues."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Call for backup and wait for assistance before proceeding."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "As Roberta floated over the Old District, the air thick with dust and memories, her mind raced with questions about the past. She saw crumbling structures that bore witness to a once vibrant culture, now seemingly forgotten. The hovercraft's hum faded, leaving her alone with her thoughts. Here, amidst the decay, she felt a strange connection to those who once thrived in this desolate locale, and a yearning to uncover their stories pressed heavily on her heart.\n\nAs she touched down, an ancient data terminal flickered in the shadows, its screen dim but pulsing with potential. Roberta knelt beside it, drawn in by the possibility of finding lost information. Could this be the key to understanding the city's past? Or would it trap her in a web of forgotten dangers? The choices ahead felt monumental, each path shadowed by uncertainty and the weight of consequence.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "Attempt to access the ancient data terminal."
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "Explore the surrounding ruins for clues."
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "Leave the Old District and head back to New Los Angeles."
+    },
+    "ending" : false
+  }, {
+    "storyText" : "Roberta's heart raced as she descended into the heart of the Old District, guided by the whispers of history that surged around her. With each crumbled brick she inspected, memories surfaced—echoes of laughter and sorrow intertwining, shaping the very essence of her being. As she stood before a charred mural, the remnants of a lost city, she felt a wave of resolve wash over her. This place, once teeming with life, was a testament to the resilience of humanity, a stark reminder of what could be lost if ignored. The decision to document her findings for the future weighed heavily on her mind. In a world where evocation of the past could spark a new awakening, she realized the gift of curiosity was not merely to uncover the truth, but to illuminate a path forward. With trembling hands, she activated her holo-camera, capturing the essence of the forgotten, her heart brimming with hope for what lay ahead.",
+    "choiceA" : {
+      "id" : "A",
+      "text" : "The End"
+    },
+    "choiceB" : {
+      "id" : "B",
+      "text" : "The End"
+    },
+    "choiceC" : {
+      "id" : "C",
+      "text" : "The End"
+    },
+    "ending" : true
+  } ],
+  "choiceHistory" : [ {
+    "chapter" : 1,
+    "choiceId" : "A",
+    "choiceDescription" : "Step onto the hovercraft and begin the journey into the unknown."
+  }, {
+    "chapter" : 2,
+    "choiceId" : "B",
+    "choiceDescription" : "Detour to investigate a mysterious signal pinging on her device."
+  }, {
+    "chapter" : 3,
+    "choiceId" : "A",
+    "choiceDescription" : "Approach the cloaked figure and see what they want."
+  }, {
+    "chapter" : 4,
+    "choiceId" : "A",
+    "choiceDescription" : "Attempt to access the ancient data terminal."
+  } ],
+  "createdAt" : [ 2025, 12, 12, 23, 3, 10, 966070200 ],
+  "lastModified" : [ 2025, 12, 12, 23, 3, 10, 967070400 ],
+  "totalChapters" : 5,
+  "storyConfiguration" : "{}",
+  "displayTitle" : "Roberta's Journey",
+  "formattedCreatedDate" : "Dec 12, 2025 23:03",
+  "shortSummary" : "In the neon underbelly of Los Angeles, Roberta stood at the edge of the hovercraft launch pad, the pulsating lights of the city reflecting in her wide..."
+}

@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class StoryStateModel {
 
-    public static final int MAX_CHAPTERS = 10;
+    public static final int MAX_CHAPTERS = 5;
 
     private int chapter = 1;
 

@@ -13,15 +13,13 @@ import java.util.function.Consumer;
 /**
  * ChoicePanel
  *
- * Displays three vertically stacked choice buttons matching the
- * parchment-style UI theme. Buttons support:
+ * Displays three vertically stacked choice buttons.
+ * Buttons support:
  *
- *   • Warm beige gradient background
- *   • Soft hover + pressed states
+ *   • Light gray gradient background
+ *   • Hover + pressed highlight
  *   • Rounded corners
  *   • Wrapped HTML text for long choice descriptions
- *
- * MainController wires the callback to handle A/B/C selections.
  */
 public class ChoicePanel extends JPanel {
 
@@ -35,7 +33,6 @@ public class ChoicePanel extends JPanel {
 
     /** Controller callback for user clicking A/B/C */
     private Consumer<String> callback;
-
 
     /* -----------------------------------------------------------
        Constructor
@@ -58,17 +55,16 @@ public class ChoicePanel extends JPanel {
         add(btnC);
     }
 
-
     /* -----------------------------------------------------------
        Button Styling
        ----------------------------------------------------------- */
 
     private void styleButton(ChoiceButton btn) {
-        btn.setFont(new Font("Georgia", Font.PLAIN, 16));
+        btn.setFont(new Font("SansSerif", Font.PLAIN, 16));
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(new EmptyBorder(12, 18, 12, 18));
+        btn.setForeground(Color.BLACK);
     }
-
 
     /* -----------------------------------------------------------
        Controller Callback
@@ -84,19 +80,16 @@ public class ChoicePanel extends JPanel {
         }
     }
 
-
     /* -----------------------------------------------------------
        External API
        ----------------------------------------------------------- */
 
-    /** Enable or disable all buttons */
     public void setButtonsEnabled(boolean enabled) {
         btnA.setEnabled(enabled);
         btnB.setEnabled(enabled);
         btnC.setEnabled(enabled);
     }
 
-    /** Update button text based on active scene */
     public void setChoices(SceneModel scene) {
         if (scene == null) {
             btnA.setText("Choice A");
@@ -119,38 +112,26 @@ public class ChoicePanel extends JPanel {
         btn.setText("<html><b>" + choice.getId() + ".</b> " + choice.getText() + "</html>");
     }
 
-
     /* -----------------------------------------------------------
-       Parchment-Style Button (Inner Class)
+       Light-Gray Gradient Button (Inner Class)
        ----------------------------------------------------------- */
 
-    /**
-     * ChoiceButton
-     *
-     * Custom JButton implementing a parchment-colored UI with:
-     *   - subtle gradient
-     *   - hover + press states
-     *   - rounded corners
-     */
     private static class ChoiceButton extends JButton {
 
-        /* Palette (warm parchment) */
-        private final Color topNormal    = new Color(0xF5F1E8);
-        private final Color bottomNormal = new Color(0xE8E2D4);
+        /* Neutral light-gray palette */
+        private final Color topNormal    = new Color(245, 245, 245);
+        private final Color bottomNormal = new Color(225, 225, 225);
 
-        private final Color topHover     = new Color(0xE9E3D8);
-        private final Color bottomHover  = new Color(0xDCD4C4);
+        private final Color topHover     = new Color(235, 235, 235);
+        private final Color bottomHover  = new Color(210, 210, 210);
 
-        private final Color topPressed   = new Color(0xD6CFC0);
-        private final Color bottomPressed= new Color(0xC8C1B3);
+        private final Color topPressed   = new Color(215, 215, 215);
+        private final Color bottomPressed= new Color(195, 195, 195);
 
         private boolean hover = false;
         private boolean pressed = false;
 
-
-        /** Constructor: configure visuals + mouse interaction */
         public ChoiceButton() {
-
             setFocusPainted(false);
             setContentAreaFilled(false);
             setBorderPainted(false);
@@ -185,11 +166,6 @@ public class ChoicePanel extends JPanel {
             });
         }
 
-
-        /* -----------------------------------------------------------
-           Rendering
-           ----------------------------------------------------------- */
-
         @Override
         protected void paintComponent(Graphics g) {
 
@@ -199,17 +175,14 @@ public class ChoicePanel extends JPanel {
             Color top, bottom;
 
             if (!isEnabled()) {
-                top = bottom = new Color(0xDDD8CC);
-            }
-            else if (pressed) {
+                top = bottom = new Color(220, 220, 220);
+            } else if (pressed) {
                 top = topPressed;
                 bottom = bottomPressed;
-            }
-            else if (hover) {
+            } else if (hover) {
                 top = topHover;
                 bottom = bottomHover;
-            }
-            else {
+            } else {
                 top = topNormal;
                 bottom = bottomNormal;
             }
@@ -218,7 +191,7 @@ public class ChoicePanel extends JPanel {
             g2.setPaint(gp);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
 
-            g2.setColor(new Color(0xB5AE9F));
+            g2.setColor(new Color(180, 180, 180));
             g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
 
             g2.dispose();

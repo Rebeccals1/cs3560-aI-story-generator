@@ -8,6 +8,7 @@ import service.OpenAIService;
 import service.PromptBuilder;
 import service.StorySaveSystem;
 import view.MainFrame;
+import view.components.ErrorDialog;
 
 import javax.swing.*;
 import java.io.File;
@@ -23,9 +24,9 @@ import java.util.List;
  *   • Generates new scenes using OpenAI (async)
  *   • Saves / loads progress via StorySaveSystem
  *
- *   DESIGN PATTERNS:
- *     - MVC controller
- *     - Uses Strategy (StoryModeStrategy) for Child-vs-Adult mode behavior
+ * DESIGN PATTERNS:
+ *   - MVC Controller
+ *   - Strategy Pattern (StoryModeStrategy)
  */
 public class MainController {
 
@@ -36,7 +37,7 @@ public class MainController {
     private final MainFrame mainFrame;
     private final StorySaveSystem saveSystem = new StorySaveSystem();
 
-    /** Not final — replaced entirely when loading a saved game. */
+    /** Replaced entirely when loading a saved game */
     private StoryModel storyModel = new StoryModel();
 
     private final PromptBuilder promptBuilder = new PromptBuilder();
@@ -47,9 +48,8 @@ public class MainController {
     private String selectedComplexity;
     private String selectedStyle;
 
-    /** STRATEGY PATTERN: runtime-selected story mode. */
+    /** Strategy selected at runtime */
     private StoryModeStrategy modeStrategy;
-
 
     /* ---------------------------------------------------------
        Constructor
@@ -58,15 +58,21 @@ public class MainController {
     public MainController(MainFrame frame) {
         this.mainFrame = frame;
         frame.setController(this);
+
+        // Show AI-disabled popup once at startup
+        if (!api.isEnabled()) {
+            SwingUtilities.invokeLater(() ->
+                    ErrorDialog.showAIDisabled(mainFrame)
+            );
+        }
     }
 
-
     /* =========================================================
-       GENRE / CHARACTER / WORLD / CONTROLS SETUP
+       SETUP METHODS
        ========================================================= */
 
     public void onGenreSelected(String g) {
-        this.selectedGenre = g;
+        selectedGenre = g;
         storyModel.setGenre(g);
     }
 
@@ -79,28 +85,19 @@ public class MainController {
     }
 
     public void onControlsSelected(String length, String complexity, String style) {
-        this.selectedLength = length;
-        this.selectedComplexity = complexity;
-        this.selectedStyle = style;
+        selectedLength = length;
+        selectedComplexity = complexity;
+        selectedStyle = style;
 
-        /* ----------------------------------------------
-           STRATEGY PATTERN:
-           Pick StoryModeStrategy based on complexity.
-           ---------------------------------------------- */
-        if ("Child-Friendly".equalsIgnoreCase(complexity)) {
-            modeStrategy = new ChildFriendlyMode();
-        } else {
-            // Default to adult/general mode
-            modeStrategy = new AdultMode();
-        }
+        modeStrategy = "Child-Friendly".equalsIgnoreCase(complexity)
+                ? new ChildFriendlyMode()
+                : new AdultMode();
 
-        // Inject strategy into PromptBuilder
         promptBuilder.setModeStrategy(modeStrategy);
     }
 
-
     /* =========================================================
-       START NEW STORY
+       STORY FLOW
        ========================================================= */
 
     public void startGame() {
@@ -108,11 +105,6 @@ public class MainController {
         requestNextScene(null);
         mainFrame.showView(MainFrame.STORY);
     }
-
-
-    /* =========================================================
-       APPLY PLAYER CHOICE
-       ========================================================= */
 
     public void applyChoice(String id) {
 
@@ -138,9 +130,8 @@ public class MainController {
         requestNextScene(id);
     }
 
-
     /* =========================================================
-       GENERATE NEXT SCENE (ASYNC OPENAI CALL)
+       ASYNC AI REQUEST
        ========================================================= */
 
     private void requestNextScene(String lastChoiceId) {
@@ -174,38 +165,35 @@ public class MainController {
                     mainFrame.getChoicePanel().setButtonsEnabled(enable);
 
                 } catch (Exception ex) {
-                    mainFrame.showError("AI Error", ex);
+                    ErrorDialog.show(mainFrame, "AI Error", ex);
                 } finally {
                     mainFrame.hideLoading();
                 }
             }
-
         }.execute();
     }
 
-
     /* =========================================================
-       LIBRARY NAVIGATION
+       LIBRARY
        ========================================================= */
 
     public void openLibrary() {
         mainFrame.showView(MainFrame.LIBRARY);
     }
 
-
     /* =========================================================
-       SAVE CURRENT STORY → /saves/<name>_chapterX.json
+       SAVE / LOAD
        ========================================================= */
 
     public void saveCurrentStory() {
         try {
             SavedStoryModel saved = new SavedStoryModel(
-                    null,                               // auto-generate title
+                    null,
                     storyModel.getGenre(),
                     storyModel.getCharacter(),
                     storyModel.getWorld(),
                     storyModel.getAllScenes(),
-                    "{}"                                // settings placeholder
+                    "{}"
             );
 
             saved.setChoiceHistory(
@@ -220,100 +208,42 @@ public class MainController {
             );
 
         } catch (Exception ex) {
-            mainFrame.showError("Save Error", ex);
+            ErrorDialog.show(mainFrame, "Save Error", ex);
         }
     }
-
-
-    /* =========================================================
-       LOAD STORY FROM A SAVE FILE
-       ========================================================= */
 
     public void loadSaveFile(File file) {
         try {
             SavedStoryModel saved = saveSystem.loadGame(file);
-
             if (saved == null) {
-                JOptionPane.showMessageDialog(
-                        mainFrame,
-                        "Save file was empty or invalid."
-                );
+                JOptionPane.showMessageDialog(mainFrame, "Invalid save file.");
                 return;
             }
 
-            /* --- Replace StoryModel entirely --- */
             storyModel = new StoryModel();
-
             storyModel.setGenre(saved.getGenre());
             storyModel.setCharacter(saved.getCharacter());
             storyModel.setWorld(saved.getWorld());
-
             storyModel.setScenes(new ArrayList<>(saved.getScenes()));
+            storyModel.setChoiceHistory(saved.getChoiceHistory());
 
-            if (saved.getChoiceHistory() != null) {
-                storyModel.setChoiceHistory(
-                        new ArrayList<>(saved.getChoiceHistory())
-                );
-            }
-
-            int chapterCount = saved.getScenes() != null
-                    ? saved.getScenes().size()
-                    : 0;
-
-            if (chapterCount == 0) {
-                JOptionPane.showMessageDialog(
-                        mainFrame,
-                        "Save file contains no scenes."
-                );
-                return;
-            }
-
-            storyModel.setCurrentChapter(chapterCount);
+            storyModel.setCurrentChapter(saved.getScenes().size());
             storyModel.restoreCurrentSceneAfterLoad();
 
             SceneModel last = storyModel.getCurrentScene();
-
             mainFrame.showScene(last);
             mainFrame.showView(MainFrame.STORY);
 
-            boolean enable = !(last.isEnding() || storyModel.isComplete());
-            mainFrame.getChoicePanel().setButtonsEnabled(enable);
-
         } catch (Exception ex) {
-            mainFrame.showError("Load Error", ex);
+            ErrorDialog.show(mainFrame, "Load Error", ex);
         }
     }
 
-
     /* =========================================================
-       TEST SUPPORT (for JUnit)
+       TEST SUPPORT
        ========================================================= */
 
-    public StoryModel getStoryModel() {
-        return storyModel;
-    }
-
-    public void restoreLoadedStory(SavedStoryModel saved) {
-        if (saved == null) return;
-
-        storyModel = new StoryModel();
-
-        storyModel.setGenre(saved.getGenre());
-        storyModel.setCharacter(saved.getCharacter());
-        storyModel.setWorld(saved.getWorld());
-
-        storyModel.setScenes(saved.getScenes());
-        storyModel.restoreCurrentSceneAfterLoad();
-
-        storyModel.setChoiceHistory(saved.getChoiceHistory());
-
-        int chapter = (saved.getScenes() != null)
-                ? saved.getScenes().size()
-                : 1;
-
-        storyModel.setCurrentChapter(chapter);
-    }
-
+    public StoryModel getStoryModel() { return storyModel; }
     public String getSelectedLength() { return selectedLength; }
     public String getSelectedComplexity() { return selectedComplexity; }
     public String getSelectedStyle() { return selectedStyle; }
