@@ -129,13 +129,13 @@ src/main/java/
      |           |
      |           |
      v           v
-+---------+   +----------------+
-| Character|   |   WorldModel  |
++----------+   +----------------+
+| Character|   |   WorldModel   |
 |  Model   |   +----------------+
-+---------+   | location       |
-              | rule           |
-              | history        |
-              +----------------+
++----------+   | location       |
+               | rule           |
+               | history        |
+               +----------------+
 
 +--------------------+
 | StoryStateModel    |
