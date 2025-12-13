@@ -112,6 +112,105 @@ src/main/java/
 └── Main.java
     # Application entry point (Swing EDT bootstrap)
 ```
+## UML Diagram
+```
++--------------------+
+|     Main           |
++--------------------+
+| + main()           |
++---------+----------+
+          |
+          v
++--------------------+        uses        +--------------------+
+|  MainController    |------------------>|   PromptBuilder    |
++--------------------+                   +--------------------+
+| - storyModel       |                   | - modeStrategy     |
+| - saveSystem       |                   +--------------------+
+| - api              |
+| - modeStrategy     |        uses        +--------------------+
++---------+----------+------------------>|  OpenAIService     |
+          |                               +--------------------+
+          | uses
+          v
++--------------------+
+|   StoryModel       |
++--------------------+
+| - character        |
+| - world            |
+| - scenes           |
+| - currentScene     |
+| - state            |
++----+-----------+---+
+     |           |
+     |           |
+     v           v
++---------+   +----------------+
+| Character|   |   WorldModel  |
+|  Model   |   +----------------+
++---------+   | location       |
+              | rule           |
+              | history        |
+              +----------------+
+
++--------------------+
+| StoryStateModel    |
++--------------------+
+| - chapter          |
+| - choiceHistory    |
+| + nextChapter()    |
+| + isComplete()     |
++--------------------+
+
++--------------------+
+|    SceneModel      |
++--------------------+
+| storyText          |
+| choiceA/B/C        |
+| ending             |
++--------------------+
+
++--------------------+
+| ChoiceRecordModel  |
++--------------------+
+| chapter            |
+| choiceId           |
+| description        |
++--------------------+
+```
+## Strategy Pattern
+```
+           <<interface>>
+        StoryModeStrategy
+               ^
+               |
+     +---------+-----------+
+     |                     |
++-----------+       +----------------+
+| AdultMode |       | ChildFriendly  |
++-----------+       +----------------+
+```
+## Factory Pattern
+```
++--------------------+
+|  CharacterFactory  |
++--------------------+
+| + create(...)      |
++--------------------+
+          |
+          v
+     CharacterModel
+
+
++--------------------+
+|   WorldFactory     |
++--------------------+
+| + create(...)      |
++--------------------+
+          |
+          v
+      WorldModel
+```
+
 ## JUnit Testing
 
 The JUnit testing structure mirrors the main project layout and validates the most important parts of the application.
