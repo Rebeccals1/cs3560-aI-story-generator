@@ -96,7 +96,7 @@ Concrete implementations (`AdultMode`, `ChildFriendlyMode`) inject tone and voca
 
 This allows new modes to be added without modifying existing logic.
 
-### Factory Pattern  **(UPDATED)**
+### Factory Pattern
 
 Factories are used to **centralize default handling and object construction**, keeping domain models simple and preventing null-state bugs.
 
