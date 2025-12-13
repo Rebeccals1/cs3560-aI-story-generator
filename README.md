@@ -20,43 +20,28 @@
 - [x] Centralized default handling for character and world creation via factories (prevents null state bugs)
 
 ## Design Patterns
-**MVC Architecture**
 
-The project follows a clear Model–View–Controller (MVC) structure to separate concerns and improve maintainability.
+**MVC Architecture**  
+The application follows MVC to separate concerns.  
+Models (`StoryModel`, `SceneModel`, `CharacterModel`, etc.) manage story data and rules, views (Swing panels) handle UI rendering and input, and `MainController` coordinates user actions, story flow, and async AI calls.  
+This separation improves maintainability and allows controller logic to be tested without launching the UI.
 
-- **Model:** Domain classes such as `StoryModel`, `StoryStateModel`, `SceneModel`, `CharacterModel`, and `WorldModel` represent the story state and business rules.
-These classes are UI-agnostic and focused solely on data and behavior.
-
-- **View:** Swing UI components (`MainFrame`, `StoryPanel`, `ChoicePanel`, `CharacterPanel`, etc.) are responsible only for rendering information and collecting user input.
-Views do not contain application logic.
-
-- **Controller:** `MainController` coordinates user actions, story progression, asynchronous AI calls, and view updates.
-This keeps application flow centralized and testable.
-
-This separation allows each layer to evolve independently and enables controller logic to be tested without launching the Swing UI.
-
-**Singleton**
-
+**Singleton**  
 `OpenAIClient` provides a single shared HTTP client with centralized API configuration, retries, and timeouts.
 
-**Builder Pattern**
+**Builder Pattern**  
+`PromptBuilder` constructs compact, token-safe AI prompts from story state, character, world, and genre data.
 
-`PromptBuilder` assembles compact, token-safe AI prompts from character, world, genre, and story state data.
+**Strategy Pattern**  
+`StoryModeStrategy` enables interchangeable storytelling behaviors.  
+`AdultMode` and `ChildFriendlyMode` are selected at runtime based on user controls.
 
-**Strategy Pattern**
+**Factory Pattern**  
+`CharacterFactory` and `WorldFactory` centralize object creation and enforce default values, removing conditional logic from the controller and preventing null state bugs.
 
-`StoryModeStrategy` allows different storytelling behaviors.
-`AdultMode` and `ChildFriendlyMode` are selected at runtime based on user controls without changing controller logic.
+**Observer-Style UI Updates**  
+Asynchronous tasks notify the controller upon completion, and the controller updates the UI dynamically without blocking the Swing thread.
 
-**Factory Pattern**
-
-`CharacterFactory` and `WorldFactory` centralize object creation and enforce default values.
-This removes conditional logic from the controller, prevents null state bugs, and improves testability.
-
-**Observer-Style UI Updates**
-
-The project uses MVC to separate data, UI, and application flow. Models store story state and rules, views render the Swing UI, and `MainController` manages user actions and story progression.
-This separation improves maintainability and enables controller testing without launching the UI.
 
 ## Main Architecture
 ```
